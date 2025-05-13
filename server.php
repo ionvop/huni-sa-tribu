@@ -11,6 +11,9 @@ if (isset($_POST["method"])) {
         case "login":
             Login($db);
             break;
+        case "logout":
+            Logout($db);
+            break;
         default:
             DefaultMethod();
             break;
@@ -19,13 +22,37 @@ if (isset($_POST["method"])) {
     DefaultMethod();
 }
 
-function Register($db) {
+function Register(SQLite3 $db): void {
     if (strlen($_POST["password"]) < 8) {
         Alert("Password must be at least 8 characters long.");
     }
 
     if ($_POST["password"] != $_POST["repassword"]) {
         Alert("Passwords do not match.");
+    }
+
+    $query = <<<SQL
+        SELECT * FROM `users` WHERE `email` = :email
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":email", $_POST["email"]);
+    $user = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+
+    if ($user != false) {
+        Alert("Email already exists.");
+    }
+
+    $query = <<<SQL
+        SELECT * FROM `users` WHERE `username` = :username
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":username", $_POST["username"]);
+    $user = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+
+    if ($user != false) {
+        Alert("Username already exists.");
     }
 
     $query = <<<SQL
@@ -47,7 +74,7 @@ function Register($db) {
     Alert("Successfully registered.", "login/");
 }
 
-function Login($db) {
+function Login(SQLite3 $db): void {
     $query = <<<SQL
         SELECT * FROM `users` WHERE `email` = :email
     SQL;
@@ -80,7 +107,21 @@ function Login($db) {
     header("Location: ./");
 }
 
-function DefaultMethod() {
+function Logout(SQLite3 $db): void {
+    $query = <<<SQL
+        UPDATE `users`
+        SET `session` = null
+        WHERE `session` = :session
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":session", $_COOKIE["session"]);
+    $stmt->execute();
+    setcookie("session", "", time() - 3600);
+    header("Location: ./");
+}
+
+function DefaultMethod(): void {
     Breakpoint([
         "post" => $_POST,
         "files" => $_FILES
