@@ -60,3 +60,69 @@ body {
     font-size: 1.5rem;
     font-weight: bold;
 }
+
+.-iconlabel {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+
+    & > .icon {
+        & > svg {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+    }
+
+    & > .label {
+        display: flex;
+        align-items: center;
+        padding-left: 1rem;
+    }
+}
+
+.-navigation {
+    display: grid;
+    grid-template-rows: repeat(4, max-content) 1fr repeat(2, max-content);
+    background-color: #5a5;
+
+    & > .tab {
+        padding-left: 3rem;
+        padding-right: 3rem;
+
+        &:hover {
+            background-color: #242;
+            color: #fff;
+            cursor: pointer;
+        }
+    }
+}
+
+.-header {
+    display: grid;
+    grid-template-columns: 1fr repeat(2, max-content);
+
+    & > .upload {
+        & > button {
+            padding: 1rem;
+            background-color: #fff;
+            border: none;
+            border-radius: 1rem;
+            color: #000;
+            font-family: sans-serif;
+            cursor: pointer;
+
+            &:hover {
+                background-color: #000;
+                color: #fff;
+            }
+        }
+    }
+
+    & > .avatar {
+        & > img {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+    }
+}
