@@ -6,7 +6,7 @@
  * @param mixed $message The message to be printed.
  * @return void
  */
-function Breakpoint($message) {
+function Breakpoint(mixed $message): void {
     header("Content-type: application/json");
     print_r($message);
     exit();
@@ -15,11 +15,11 @@ function Breakpoint($message) {
 /**
  * Prints the given message as an alert and redirects the user.
  *
- * @param mixed $message The message to be displayed.
+ * @param string $message The message to be displayed.
  * @param string $redirect The URL to redirect the user to. If empty, the user will be redirected back.
  * @return void
  */
-function Alert($message, $redirect = "") {
+function Alert(string $message, string $redirect = ""): void {
     $message = json_encode($message);
 
     $redirectScript = <<<JS
@@ -44,7 +44,7 @@ function Alert($message, $redirect = "") {
     exit();
 }
 
-function GetUser($db) {
+function GetUser(SQLite3 $db): array|false {
     if (isset($_COOKIE["session"]) == false) {
         return false;
     }
