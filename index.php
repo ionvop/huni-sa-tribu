@@ -2,6 +2,15 @@
 
 include "common.php";
 $db = new SQLite3("database.db");
+$user = GetUser($db);
+
+if ($user == false) {
+    header("Location: login/");
+    exit;
+}
+
+header("Location: dashboard/");
+exit;
 
 ?>
 
