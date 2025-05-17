@@ -42,6 +42,17 @@ body {
     width: 100%;
 }
 
+.-textarea {
+    padding: 1rem;
+    font-family: sans-serif;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 1rem;
+    width: 100%;
+    resize: vertical;
+    height: 10rem;
+}
+
 .-center {
     text-align: center;
 }
