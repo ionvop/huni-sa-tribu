@@ -14,6 +14,9 @@ if (isset($_POST["method"])) {
         case "logout":
             Logout($db);
             break;
+        case "upload":
+            Upload($db);
+            break;
         default:
             DefaultMethod();
             break;
@@ -119,6 +122,53 @@ function Logout(SQLite3 $db): void {
     $stmt->execute();
     setcookie("session", "", time() - 3600);
     header("Location: ./");
+}
+
+function Upload(SQLite3 $db): void {
+    $user = GetUser($db);
+
+    if ($user == false) {
+        Alert("You are not logged in.");
+    }
+
+    if ($_FILES["media"]["error"] != 0) {
+        Alert("Error uploading file.");
+    }
+
+    $type = "";
+
+    if (strpos($_FILES["media"]["type"], "image") === 0) {
+        $type = "image";
+    } else if (strpos($_FILES["media"]["type"], "audio") === 0) {
+        $type = "audio";
+    } else if (strpos($_FILES["media"]["type"], "video") === 0) {
+        $type = "video";
+    } else {
+        Alert("Invalid file type.");
+    }
+
+    $fileId = uniqid("media_");
+    $filename = "{$fileId}." . pathinfo($_FILES["media"]["name"], PATHINFO_EXTENSION);
+    
+    if (move_uploaded_file($_FILES["media"]["tmp_name"], "uploads/media/{$filename}") == false) {
+        Alert("Error uploading file.");
+    }
+
+    $query = <<<SQL
+        INSERT INTO `entries`(`user_id`, `title`, `group`, `board`, `description`, `type`, `file`)
+        VALUES (:user_id, :title, :group, :board, :description, :type, :file)
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":user_id", $user["id"]);
+    $stmt->bindValue(":title", $_POST["title"]);
+    $stmt->bindValue(":group", $_POST["group"]);
+    $stmt->bindValue(":board", $_POST["board"]);
+    $stmt->bindValue(":description", $_POST["description"]);
+    $stmt->bindValue(":type", $type);
+    $stmt->bindValue(":file", $filename);
+    $stmt->execute();
+    header("Location: dashboard/");
 }
 
 function DefaultMethod(): void {
