@@ -159,3 +159,58 @@ function SetHeader(): string {
         </div>
     HTML;
 }
+
+function RenderEntries(SQLite3 $db, string $type, int $userId, int $limit): string {
+    $query = <<<SQL
+        SELECT * FROM `entries` WHERE `user_id` = :userId AND `type` = :type ORDER BY `time` DESC LIMIT {$limit}
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":userId", $userId);
+    $stmt->bindValue(":type", $type);
+    $result = $stmt->execute();
+    $output = "";
+
+    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+        $row["title"] = htmlentities($row["title"]);
+        $row["time"] = date("F j, Y, g:i A", $row["time"]);
+        $image = "";
+
+        switch ($type) {
+            case "image":
+                $image = <<<HTML
+                    <img src="uploads/media/{$row['file']}">
+                HTML;
+
+                break;
+            case "audio":
+                $image = <<<HTML
+                    <img src="assets/music.png">
+                HTML;
+
+                break;
+            case "video":
+                $image = <<<HTML
+                    <video src="uploads/media/{$row['file']}"></video>
+                HTML;
+
+                break;
+        }
+
+        $output .= <<<HTML
+            <a class="-a item" href="dashboard/edit/?id={$row['id']}">
+                <div class="image -pad">
+                    {$image}
+                </div>
+                <div class="title -pad">
+                    {$row["title"]}
+                </div>
+                <div class="date -pad">
+                    {$row["time"]}
+                </div>
+            </a>
+        HTML;
+    }
+
+    return $output;
+}
