@@ -77,6 +77,13 @@ if ($user == false) {
                                         object-fit: cover;
                                         border-radius: 1rem;
                                     }
+
+                                    & > video {
+                                        width: 100%;
+                                        height: 10rem;
+                                        object-fit: cover;
+                                        border-radius: 1rem;
+                                    }
                                 }
 
                                 & > .title {
@@ -122,32 +129,23 @@ if ($user == false) {
                         Images
                     </div>
                     <div class="list">
-                        <?php
-                            $query = <<<SQL
-                                SELECT * FROM `entries` WHERE `type` = 'image' ORDER BY `time` DESC LIMIT 5
-                            SQL;
-
-                            $result = $db->query($query);
-
-                            while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                                $row["title"] = htmlentities($row["title"]);
-                                $row["time"] = date("F j, Y, g:i A", $row["time"]);
-
-                                echo <<<HTML
-                                    <div class="item">
-                                        <div class="image -pad">
-                                            <img src="uploads/media/{$row['file']}">
-                                        </div>
-                                        <div class="title -pad">
-                                            {$row["title"]}
-                                        </div>
-                                        <div class="date -pad">
-                                            {$row["time"]}
-                                        </div>
-                                    </div>
-                                HTML;
-                            }
-                        ?>
+                        <?=RenderEntries($db, "image", $user["id"], 5)?>
+                    </div>
+                </div>
+                <div class="music media">
+                    <div class="label -pad -title">
+                        Music
+                    </div>
+                    <div class="list">
+                        <?=RenderEntries($db, "audio", $user["id"], 5)?>
+                    </div>
+                </div>
+                <div class="videos media">
+                    <div class="label -pad -title">
+                        Videos
+                    </div>
+                    <div class="list">
+                        <?=RenderEntries($db, "video", $user["id"], 5)?>
                     </div>
                 </div>
             </div>
