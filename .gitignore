@@ -1,3 +1,2 @@
+config.php
 database.db
-uploads/media/*
-!uploads/media/blank.txt
