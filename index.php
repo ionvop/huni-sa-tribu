@@ -1,35 +1,38 @@
 <?php
 
 include "common.php";
-$db = new SQLite3("database.db");
-$user = GetUser($db);
+$user = getUser();
 
 if ($user == false) {
     header("Location: login/");
-    exit;
+    exit();
 }
-
-header("Location: dashboard/");
-exit;
 
 ?>
 
 <html>
     <head>
         <title>
-            Login
+            Home
         </title>
         <base href="./">
         <link rel="stylesheet" href="style.css">
         <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
-
+            
         </style>
     </head>
     <body>
         <div class="main">
-            
+            <div class="text -pad">
+                Logged in user: <?=$user["username"]?>
+            </div>
+            <form action="server.php" class="-form logout -pad" method="post" enctype="multipart/form-data">
+                <button class="-button" name="method" value="logout">
+                    Logout
+                </button>
+            </form>
         </div>
         <script src="script.js"></script>
         <script>
