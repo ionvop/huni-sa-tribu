@@ -1,50 +1,152 @@
 <?php
 
 include "common.php";
-$db = new SQLite3("database.db");
 
-if (isset($_POST["method"])) {
-    switch ($_POST["method"]) {
-        case "register":
-            Register($db);
-            break;
-        case "login":
-            Login($db);
-            break;
-        case "logout":
-            Logout($db);
-            break;
-        case "upload":
-            Upload($db);
+if (isset($_GET["method"])) {
+    switch ($_GET["method"]) {
+        case "verify":
+            verify();
             break;
         default:
-            DefaultMethod();
+            defaultMethod();
+            break;
+    }
+} else if (isset($_POST["method"])) {
+    switch ($_POST["method"]) {
+        case "register":
+            register();
+            break;
+        case "login":
+            login();
+            break;
+        case "logout":
+            logout();
+            break;
+        default:
+            defaultMethod();
             break;
     }
 } else {
-    DefaultMethod();
+    defaultMethod();
 }
 
-function Register(SQLite3 $db): void {
-    if (strlen($_POST["password"]) < 8) {
-        Alert("Password must be at least 8 characters long.");
-    }
+function verify() {
+    $db = new SQLite3("database.db");
 
-    if ($_POST["password"] != $_POST["repassword"]) {
-        Alert("Passwords do not match.");
+    $query = <<<SQL
+        DELETE FROM `email_verifications` WHERE `time` < :time
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":time", time() - 600);
+    $stmt->execute();
+
+    $query = <<<SQL
+        SELECT * FROM `email_verifications` WHERE `email` = :email AND `code` = :code
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":email", $_GET["email"]);
+    $stmt->bindValue(":code", $_GET["code"]);
+    $verification = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+
+    if ($verification == false) {
+        alert("Invalid verification link. It may have expired.");
     }
 
     $query = <<<SQL
-        SELECT * FROM `users` WHERE `email` = :email
+        UPDATE `email_verifications` SET `is_verified` = 'yes', `time` = :time WHERE `email` = :email AND `code` = :code
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":email", $_GET["email"]);
+    $stmt->bindValue(":code", $_GET["code"]);
+    $stmt->bindValue(":time", time());
+    $stmt->execute();
+
+    $query = <<<SQL
+        DELETE FROM `email_verifications` WHERE `email` = :email AND `is_verified` = 'no'
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":email", $_GET["email"]);
+    $stmt->execute();
+    alert("Email address verified. Please register this email within 10 minutes.");
+    header("Location: ./");
+}
+
+function register() {
+    $db = new SQLite3("database.db");
+
+    if (strlen($_POST["fullname"]) == 0 || strlen($_POST["fullname"]) > 50) {
+        alert("Fullname must be between 1 and 50 characters.");
+    }
+
+    if (strlen($_POST["username"]) < 4 || strlen($_POST["username"]) > 20) {
+        alert("Username must be between 4 and 20 characters.");
+    }
+
+    if (filter_var($_POST["email"], FILTER_VALIDATE_EMAIL) === false) {
+        alert("Invalid email address.");
+    }
+
+    if (strlen($_POST["password"]) < 6 || strlen($_POST["password"]) > 50) {
+        alert("Password must be between 6 and 50 characters.");
+    }
+
+    if ($_POST["password"] != $_POST["repassword"]) {
+        alert("Passwords do not match.");
+    }
+
+    $query = <<<SQL
+        SELECT * FROM `email_verifications` WHERE `email` = :email AND `is_verified` = 'yes'
     SQL;
 
     $stmt = $db->prepare($query);
     $stmt->bindValue(":email", $_POST["email"]);
+    $verification = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+
+    if ($verification == false) {
+        alert("Email address not yet verified or it may have expired.");
+    }
+
+    $query = <<<SQL
+        SELECT * FROM `users` WHERE `username` = :username OR `email` = :email
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":username", $_POST["username"]);
+    $stmt->bindValue(":email", $_POST["email"]);
     $user = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
 
     if ($user != false) {
-        Alert("Email already exists.");
+        if ($user["username"] == $_POST["username"]) {
+            alert("Username is already taken.");
+        }
+
+        if ($user["email"] == $_POST["email"]) {
+            alert("Email is already taken.");
+        }
     }
+
+    $hash = password_hash($_POST["password"], PASSWORD_DEFAULT);
+    
+    $query = <<<SQL
+        INSERT INTO `users` (`fullname`, `email`, `username`, `hash`) VALUES (:fullname, :email, :username, :hash)
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":fullname", $_POST["fullname"]);
+    $stmt->bindValue(":email", $_POST["email"]);
+    $stmt->bindValue(":username", $_POST["username"]);
+    $stmt->bindValue(":hash", $hash);
+    $stmt->execute();
+    alert("Account successfully created. Please login.");
+    header("Location: ./");
+}
+
+function login() {
+    $db = new SQLite3("database.db");
 
     $query = <<<SQL
         SELECT * FROM `users` WHERE `username` = :username
@@ -54,126 +156,50 @@ function Register(SQLite3 $db): void {
     $stmt->bindValue(":username", $_POST["username"]);
     $user = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
 
-    if ($user != false) {
-        Alert("Username already exists.");
-    }
-
-    $query = <<<SQL
-        INSERT INTO `users`(`username`, `firstname`, `lastname`, `email`, `contact`, `hash`, `gender`, `birthdate`, `role`)
-        VALUES (:username, :firstname, :lastname, :email, :contact, :hash, :gender, :birthdate, :role)
-    SQL;
-
-    $stmt = $db->prepare($query);
-    $stmt->bindValue(":username", $_POST["username"]);
-    $stmt->bindValue(":firstname", $_POST["firstname"]);
-    $stmt->bindValue(":lastname", $_POST["lastname"]);
-    $stmt->bindValue(":email", $_POST["email"]);
-    $stmt->bindValue(":contact", $_POST["contact"]);
-    $stmt->bindValue(":hash", password_hash($_POST["password"], PASSWORD_DEFAULT));
-    $stmt->bindValue(":gender", $_POST["gender"]);
-    $stmt->bindValue(":birthdate", $_POST["birthdate"]);
-    $stmt->bindValue(":role", "contributor");
-    $stmt->execute();
-    Alert("Successfully registered.", "login/");
-}
-
-function Login(SQLite3 $db): void {
-    $query = <<<SQL
-        SELECT * FROM `users` WHERE `email` = :email
-    SQL;
-
-    $stmt = $db->prepare($query);
-    $stmt->bindValue(":email", $_POST["email"]);
-    $user = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
-
     if ($user == false) {
-        Alert("Invalid email or password.");
+        alert("Invalid credentials.");
     }
 
     if (password_verify($_POST["password"], $user["hash"]) == false) {
-        Alert("Invalid email or password.");
+        alert("Invalid credentials.");
     }
 
-    $session = uniqid("session_");
+    $session = uniqid("session-");
 
     $query = <<<SQL
-        UPDATE `users`
-        SET `session` = :session
-        WHERE `email` = :email
+        UPDATE `users` SET `session` = :session WHERE `id` = :id
     SQL;
 
     $stmt = $db->prepare($query);
     $stmt->bindValue(":session", $session);
-    $stmt->bindValue(":email", $_POST["email"]);
+    $stmt->bindValue(":id", $user["id"]);
     $stmt->execute();
-    setcookie("session", $session, time() + 86400);
+    setcookie("session", $session, time() + 86400 * 30);
     header("Location: ./");
 }
 
-function Logout(SQLite3 $db): void {
+function logout() {
+    $db = new SQLite3("database.db");
+    $user = getUser();
+
     $query = <<<SQL
-        UPDATE `users`
-        SET `session` = null
-        WHERE `session` = :session
+        UPDATE `users` SET `session` = NULL WHERE `id` = :id
     SQL;
 
     $stmt = $db->prepare($query);
-    $stmt->bindValue(":session", $_COOKIE["session"]);
+    $stmt->bindValue(":id", $user["id"]);
     $stmt->execute();
     setcookie("session", "", time() - 3600);
     header("Location: ./");
+    exit();
 }
 
-function Upload(SQLite3 $db): void {
-    $user = GetUser($db);
+function defaultMethod() {
+    session_start();
 
-    if ($user == false) {
-        Alert("You are not logged in.");
-    }
-
-    if ($_FILES["media"]["error"] != 0) {
-        Alert("Error uploading file.");
-    }
-
-    $type = "";
-
-    if (strpos($_FILES["media"]["type"], "image") === 0) {
-        $type = "image";
-    } else if (strpos($_FILES["media"]["type"], "audio") === 0) {
-        $type = "audio";
-    } else if (strpos($_FILES["media"]["type"], "video") === 0) {
-        $type = "video";
-    } else {
-        Alert("Invalid file type.");
-    }
-
-    $fileId = uniqid("media_");
-    $filename = "{$fileId}." . pathinfo($_FILES["media"]["name"], PATHINFO_EXTENSION);
-    
-    if (move_uploaded_file($_FILES["media"]["tmp_name"], "uploads/media/{$filename}") == false) {
-        Alert("Error uploading file.");
-    }
-
-    $query = <<<SQL
-        INSERT INTO `entries`(`user_id`, `title`, `group`, `board`, `description`, `type`, `file`)
-        VALUES (:user_id, :title, :group, :board, :description, :type, :file)
-    SQL;
-
-    $stmt = $db->prepare($query);
-    $stmt->bindValue(":user_id", $user["id"]);
-    $stmt->bindValue(":title", $_POST["title"]);
-    $stmt->bindValue(":group", $_POST["group"]);
-    $stmt->bindValue(":board", $_POST["board"]);
-    $stmt->bindValue(":description", $_POST["description"]);
-    $stmt->bindValue(":type", $type);
-    $stmt->bindValue(":file", $filename);
-    $stmt->execute();
-    header("Location: dashboard/");
-}
-
-function DefaultMethod(): void {
-    Breakpoint([
+    breakpoint([
         "post" => $_POST,
-        "files" => $_FILES
+        "files" => $_FILES,
+        "session" => $_SESSION
     ]);
 }
