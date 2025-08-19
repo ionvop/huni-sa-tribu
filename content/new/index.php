@@ -41,6 +41,17 @@ include "common.php";
                                         height: 100%;
                                         border: 1px solid #555;
                                         border-radius: 1rem;
+                                        overflow: hidden;
+
+                                        & > img {
+                                            max-width: 100%;
+                                            max-height: 100%;
+                                        }
+
+                                        & > video {
+                                            max-width: 100%;
+                                            max-height: 100%;
+                                        }
                                     }
                                 }
                             }
@@ -89,12 +100,12 @@ include "common.php";
                     <form action="server.php" class="-form box" method="post" enctype="multipart/form-data">
                         <div class="media">
                             <div class="preview -pad">
-                                <div class="box -pad">
+                                <div class="box -pad -center__flex" id="panelMedia">
 
                                 </div>
                             </div>
                             <div class="upload -pad -center">
-                                <input type="file" name="media" required>
+                                <input type="file" id="inputMedia" onchange="inputMedia_change(event)" name="media" required>
                             </div>
                         </div>
                         <div class="form">
@@ -183,7 +194,38 @@ include "common.php";
         </div>
         <script src="script.js"></script>
         <script>
+            let panelMedia = document.getElementById("panelMedia");
+            let inputMedia = document.getElementById("inputMedia");
 
+            function inputMedia_change(event) {
+                let file = event.target.files[0];
+                let reader = new FileReader();
+
+                reader.onload = (event) => {
+                    panelMedia.innerHTML = "";
+
+                    if (file.type.includes("image")) {
+                        let image = document.createElement("img");
+                        image.src = event.target.result;
+                        panelMedia.innerHTML = "";
+                        panelMedia.appendChild(image);
+                    } else if (file.type.includes("video")) {
+                        let video = document.createElement("video");
+                        video.src = event.target.result;
+                        video.controls = true;
+                        panelMedia.innerHTML = "";
+                        panelMedia.appendChild(video);
+                    } else if (file.type.includes("audio")) {
+                        let audio = document.createElement("audio");
+                        audio.src = event.target.result;
+                        audio.controls = true;
+                        panelMedia.innerHTML = "";
+                        panelMedia.appendChild(audio);
+                    }
+                }
+
+                reader.readAsDataURL(file);
+            }
         </script>
     </body>
 </html>
