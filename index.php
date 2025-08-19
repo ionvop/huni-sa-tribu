@@ -140,30 +140,7 @@ if ($user == false) {
     </head>
     <body>
         <div class="main -main">
-            <div class="-header -header--user">
-                <div></div>
-                <div class="title">
-                    <div class="title -pad -title">
-                        Huni sa Tribu
-                    </div>
-                    <div class="subtitle -pad">
-                        Administrative Access
-                    </div>
-                </div>
-                <div></div>
-                <form action="server.php" class="-form logout -pad -center__flex" method="post" enctype="multipart/form-data">
-                    <button class="-button" name="method" value="logout">
-                        <div class="-iconlabel">
-                            <div class="icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#111111"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/></svg>
-                            </div>
-                            <div class="label">
-                                Logout
-                            </div>
-                        </div>
-                    </button>
-                </form>
-            </div>
+            <?=renderHeader("home")?>
             <div class="content -pad">
                 <div class="title -pad -title -center">
                     Admin Portal
@@ -228,11 +205,11 @@ if ($user == false) {
                                     </div>
                                 </div>
                             </div>
-                            <div class="button -pad">
+                            <a href="content/" class="-a button -pad">
                                 <button class="-button">
                                     Access Content Management
                                 </button>
-                            </div>
+                            </a>
                         </div>
                     </div>
                     <div class="visitor page -pad">
