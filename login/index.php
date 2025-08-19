@@ -114,18 +114,7 @@ include "common.php";
     </head>
     <body>
         <div class="main -main">
-            <div class="-header">
-                <div></div>
-                <div class="title">
-                    <div class="title -pad -title">
-                        Huni sa Tribu
-                    </div>
-                    <div class="subtitle -pad">
-                        Administrative Access
-                    </div>
-                </div>
-                <div></div>
-            </div>
+            <?=renderHeader("login")?>
             <div class="content -center__flex">
                 <div class="form">
                     <div class="title -pad -title -center">
