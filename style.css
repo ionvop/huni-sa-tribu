@@ -108,3 +108,7 @@ body {
         }
     }
 }
+
+.-header--user {
+    grid-template-columns: 10rem max-content 1fr max-content 10rem;
+}
