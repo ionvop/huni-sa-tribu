@@ -23,6 +23,89 @@ include "common.php";
                 
                     & > .content {
                         overflow: auto;
+
+                        & > .top {
+                            display: grid;
+                            grid-template-columns: 1fr max-content;
+
+                            & > .title {
+                                font-weight: bold;
+
+                                & > .subtitle {
+                                    color: #555;
+                                }
+                            }
+
+                            & > .new {
+                                & > button {
+                                    background-color: var(--theme-green-dark);
+                                    font-weight: bold;
+                                    color: #fff;
+                                }
+                            }
+                        }
+
+                        & > .search {
+                            & > .box {
+                                display: grid;
+                                grid-template-columns: max-content 1fr;
+                                width: 30rem;
+                                border: 1px solid #555;
+                                border-radius: 1rem;
+
+                                & > .icon {
+                                    padding-left: 1rem;
+                                    padding-right: 1rem;
+                                }
+
+                                & > .input {
+                                    & > input {
+                                        border: none;
+                                    }
+                                }
+                            }
+                        }
+
+                        & > .table {
+                            overflow: hidden;
+                            height: 30rem;
+
+                            & > .box {
+                                display: grid;
+                                grid-template-columns: repeat(9, max-content);
+                                grid-template-rows: max-content;
+                                height: 100%;
+                                border: 1px solid #555;
+                                border-radius: 1rem;
+                                overflow: auto;
+
+                                & > .header {
+                                    border-bottom: 1px solid #555;
+                                    padding-left: 3rem;
+                                    padding-right: 3rem;
+                                }
+
+                                & > .data {
+                                    border-bottom: 1px solid #555;
+                                    min-width: 5rem;
+                                }
+                            }
+                        }
+
+                        & .stats {
+                            & > .box {
+                                display: grid;
+                                grid-template-columns: repeat(4, 1fr);
+                                border: 1px solid #555;
+                                border-radius: 1rem;
+
+                                & > .stat {
+                                    & > .value {
+                                        font-weight: bold;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -32,13 +115,18 @@ include "common.php";
         <div class="main -main">
             <?=renderHeader("content")?>
             <div class="content">
-                <?=renderNavigation("content")?>
-                <div class="content">
+                <?=renderNavigation("content", "all")?>
+                <div class="content -pad">
                     <div class="top">
-                        <div class="title -pad -title">
-                            All Content
+                        <div class="title">
+                            <div class="title -pad -title">
+                                All Content
+                            </div>
+                            <div class="subtitle -pad">
+                                Manage cultural artifacts and track management
+                            </div>
                         </div>
-                        <div class="new -pad">
+                        <a href="content/new/" class="-a new -pad">
                             <button class="-button">
                                 <div class="-iconlabel">
                                     <div class="icon">
@@ -49,63 +137,44 @@ include "common.php";
                                     </div>
                                 </div>
                             </button>
-                        </div>
-                    </div>
-                    <div class="subtitle">
-                        Manage cultural artifacts and track management
+                        </a>
                     </div>
                     <div class="search -pad">
                         <div class="box">
-                            <div class="icon -pad">
+                            <div class="icon -center__flex">
                                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#111111"><path d="M380-320q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l224 224q11 11 11 28t-11 28q-11 11-28 11t-28-11L532-372q-30 24-69 38t-83 14Zm0-80q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>
                             </div>
-                            <div class="input -pad">
-                                <input type="text" class="-input">
+                            <div class="input">
+                                <input type="text" class="-input" placeholder="Search content...">
                             </div>
                         </div>
                     </div>
-                    <div class="table">
+                    <div class="table -pad">
                         <div class="box">
                             <div class="date header -pad -center__flex">
                                 Date
                             </div>
-                        </div>
-                        <div class="box">
                             <div class="title header -pad -center__flex">
                                 Title
                             </div>
-                        </div>
-                        <div class="box">
                             <div class="tribe header -pad -center__flex">
                                 Tribe
                             </div>
-                        </div>
-                        <div class="box">
                             <div class="category header -pad -center__flex">
                                 Category
                             </div>
-                        </div>
-                        <div class="box">
                             <div class="type header -pad -center__flex">
                                 Type
                             </div>
-                        </div>
-                        <div class="box">
                             <div class="engagement header -pad -center__flex">
                                 Engagement
                             </div>
-                        </div>
-                        <div class="box">
                             <div class="webviews header -pad -center__flex">
                                 Web Views
                             </div>
-                        </div>
-                        <div class="box">
                             <div class="appscans header -pad -center__flex">
                                 App Scans
                             </div>
-                        </div>
-                        <div class="box">
                             <div class="actions header -pad -center__flex">
                                 Actions
                             </div>
@@ -114,37 +183,37 @@ include "common.php";
                             // TODO: add render
                         ?>
                     </div>
-                    <div class="stats">
+                    <div class="stats -pad">
                         <div class="box">
-                            <div class="content">
-                                <div class="value">
+                            <div class="content stat">
+                                <div class="value -pad -title -center">
                                     0
                                 </div>
-                                <div class="label">
+                                <div class="label -pad -center">
                                     Total Content
                                 </div>
                             </div>
-                            <div class="webviews">
-                                <div class="value">
+                            <div class="webviews stat">
+                                <div class="value -pad -title -center">
                                     0
                                 </div>
-                                <div class="label">
+                                <div class="label -pad -center">
                                     Total Web Views
                                 </div>
                             </div>
-                            <div class="appscans">
-                                <div class="value">
+                            <div class="appscans stat">
+                                <div class="value -pad -title -center">
                                     0
                                 </div>
-                                <div class="label">
+                                <div class="label -pad -center">
                                     Total App Scans
                                 </div>
                             </div>
-                            <div class="engagement">
-                                <div class="value">
+                            <div class="engagement stat">
+                                <div class="value -pad -title -center">
                                     0%
                                 </div>
-                                <div class="label">
+                                <div class="label -pad -center">
                                     Avg. Engagement
                                 </div>
                             </div>
