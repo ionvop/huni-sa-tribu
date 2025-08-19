@@ -103,3 +103,113 @@ function getUser() {
     
     return $user;
 }
+
+function renderHeader($type) {
+    switch ($type) {
+        case "login":
+            return <<<HTML
+                <div class="-header">
+                    <div></div>
+                    <div class="title">
+                        <div class="title -pad -title">
+                            Huni sa Tribu
+                        </div>
+                        <div class="subtitle -pad">
+                            Administrative Access
+                        </div>
+                    </div>
+                    <div></div>
+                </div>
+            HTML;
+
+            break;
+        case "home":
+            return <<<HTML
+                <div class="-header -header--user">
+                    <div></div>
+                    <div class="title">
+                        <div class="title -pad -title">
+                            Huni sa Tribu
+                        </div>
+                        <div class="subtitle -pad">
+                            Administrative Access
+                        </div>
+                    </div>
+                    <div></div>
+                    <form action="server.php" class="-form logout -pad -center__flex" method="post" enctype="multipart/form-data">
+                        <button class="-button" name="method" value="logout">
+                            <div class="-iconlabel">
+                                <div class="icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#111111"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/></svg>
+                                </div>
+                                <div class="label">
+                                    Logout
+                                </div>
+                            </div>
+                        </button>
+                    </form>
+                </div>
+            HTML;
+
+            break;
+        case "content":
+            return <<<HTML
+                <div class="-header__content">
+                    <a href="./" class="-a back -pad">
+                        <div class="button -pad -center__flex">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="m313-440 196 196q12 12 11.5 28T508-188q-12 11-28 11.5T452-188L188-452q-6-6-8.5-13t-2.5-15q0-8 2.5-15t8.5-13l264-264q11-11 27.5-11t28.5 11q12 12 12 28.5T508-715L313-520h447q17 0 28.5 11.5T800-480q0 17-11.5 28.5T760-440H313Z"/></svg>
+                        </div>
+                        <div class="label -pad -center__flex">
+                            Back to Admin
+                        </div>
+                    </a>
+                    <div class="title">
+                        <div class="title -pad -title">
+                            Content Management
+                        </div>
+                        <div class="subtitle -pad">
+                            Manage cultural artifacts and media
+                        </div>
+                    </div>
+                    <div></div>
+                </div>
+            HTML;
+
+            break;
+    }
+}
+
+function renderNavigation($type) {
+    switch ($type) {
+        case "content":
+            return <<<HTML
+                <div class="-navigation">
+                    <div class="title -pad">
+                        CONTENT CATEGORIES
+                    </div>
+                    <div class="all tab tab--selected -pad">
+                        <div class="box -pad -center">
+                            All Content
+                        </div>
+                    </div>
+                    <div class="all tab -pad">
+                        <div class="box -pad -center">
+                            Music
+                        </div>
+                    </div>
+                    <div class="all tab -pad">
+                        <div class="box -pad -center">
+                            Instruments
+                        </div>
+                    </div>
+                    <div class="all tab -pad">
+                        <div class="box -pad -center">
+                            Videos
+                        </div>
+                    </div>
+                </div>
+            HTML;
+
+            break;
+    }
+}
