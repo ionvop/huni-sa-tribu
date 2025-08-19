@@ -1,6 +1,9 @@
 :root {
     --theme-brown: #5a321e;
     --theme-brown-light: #6e5849;
+    --theme-green: #00823c;
+    --theme-green-light: #528d63;
+    --theme-green-dark: #055a1e;
 }
 
 body {
@@ -22,6 +25,7 @@ body {
     border-radius: 1rem;
     font-family: Arial, Helvetica, sans-serif;
     font-size: 1rem;
+    cursor: pointer;
 }
 
 .-form {
@@ -111,4 +115,61 @@ body {
 
 .-header--user {
     grid-template-columns: 10rem max-content 1fr max-content 10rem;
+}
+
+.-header__content {
+    display: grid;
+    grid-template-columns: repeat(2, max-content) 1fr;
+    background-color: var(--theme-green);
+    color: #fff;
+
+    & > .back {
+        display: grid;
+        grid-template-columns: repeat(2, max-content);
+        cursor: pointer;
+        transition-duration: 0.1s;
+
+        &:hover {
+            background-color: var(--theme-green-light);
+        }
+    }
+
+    & > .title {
+        & > .subtitle {
+            padding-top: 0rem;
+            color: #aaa;
+        }
+    }
+}
+
+.-navigation {
+    background-color: var(--theme-green-dark);
+    color: #fff;
+
+    & > .title {
+        color: #aaa;
+    }
+
+    & > .tab {
+        transition-duration: 0.1s;
+        cursor: pointer;
+        
+        &:hover {
+            & > .box {
+                background-color: var(--theme-green-light);
+            }
+        }
+        
+        & > .box {
+            padding-left: 5rem;
+            padding-right: 5rem;
+            border-radius: 1rem;
+        }
+    }
+
+    & > .tab--selected {
+        & > .box {
+            background-color: var(--theme-green-light);
+        }
+    }
 }
