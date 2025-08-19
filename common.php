@@ -179,34 +179,49 @@ function renderHeader($type) {
     }
 }
 
-function renderNavigation($type) {
+function renderNavigation($type, $selected) {
     switch ($type) {
         case "content":
+            $allSelected = "";
+            $musicSelected = "";
+            $instrumentsSelected = "";
+            $videosSelected = "";
+
+            if ($selected == "all") {
+                $allSelected = "tab--selected";
+            } else if ($selected == "music") {
+                $musicSelected = "tab--selected";
+            } else if ($selected == "instruments") {
+                $instrumentsSelected = "tab--selected";
+            } else if ($selected == "videos") {
+                $videosSelected = "tab--selected";
+            }
+
             return <<<HTML
                 <div class="-navigation">
-                    <div class="title -pad">
+                    <div class="title -pad -center">
                         CONTENT CATEGORIES
                     </div>
-                    <div class="all tab tab--selected -pad">
+                    <a href="content/" class="-a all tab {$allSelected} -pad">
                         <div class="box -pad -center">
                             All Content
                         </div>
-                    </div>
-                    <div class="all tab -pad">
+                    </a>
+                    <a href="content/?type=music" class="-a music tab {$musicSelected} -pad">
                         <div class="box -pad -center">
                             Music
                         </div>
-                    </div>
-                    <div class="all tab -pad">
+                    </a>
+                    <a href="content/?type=instrument" class="-a instruments tab {$instrumentsSelected} -pad">
                         <div class="box -pad -center">
                             Instruments
                         </div>
-                    </div>
-                    <div class="all tab -pad">
+                    </a>
+                    <a href="content/?type=video" class="-a videos tab {$videosSelected} -pad">
                         <div class="box -pad -center">
                             Videos
                         </div>
-                    </div>
+                    </a>
                 </div>
             HTML;
 
