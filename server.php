@@ -22,6 +22,9 @@ if (isset($_GET["method"])) {
         case "logout":
             logout();
             break;
+        case "upload":
+            upload();
+            break;
         default:
             defaultMethod();
             break;
@@ -192,6 +195,49 @@ function logout() {
     setcookie("session", "", time() - 3600);
     header("Location: ./");
     exit();
+}
+
+function upload() {
+    $db = new SQLite3("database.db");
+    $user = getUser();
+
+    if ($user == false) {
+        alert("You must be logged in to upload.");
+    }
+
+    if (strlen($_POST["title"]) <= 0 || strlen($_POST["title"]) > 50) {
+        alert("Title must be between 1 and 50 characters.");
+    }
+
+    if (strlen($_POST["description"]) <= 0 || strlen($_POST["description"]) > 1000) {
+        alert("Description must be between 1 and 1000 characters.");
+    }
+
+    if ($_FILES["media"]["error"] != 0) {
+        alert("File could not be uploaded.");
+    }
+
+    $filename = uniqid("upload-") . "." . pathinfo($_FILES["media"]["name"], PATHINFO_EXTENSION);
+
+    if (move_uploaded_file($_FILES["media"]["tmp_name"], "uploads/{$filename}") == false) {
+        alert("File could not be uploaded.");
+    }
+
+    $query = <<<SQL
+        INSERT INTO `uploads` (`user_id`, `title`, `tribe`, `description`, `category`, `type`, `file`)
+        VALUES (:user_id, :title, :tribe, :description, :category, :type, :file)
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":user_id", $user["id"]);
+    $stmt->bindValue(":title", $_POST["title"]);
+    $stmt->bindValue(":tribe", $_POST["tribe"]);
+    $stmt->bindValue(":description", $_POST["description"]);
+    $stmt->bindValue(":category", $_POST["category"]);
+    $stmt->bindValue(":type", $_POST["type"]);
+    $stmt->bindValue(":file", $filename);
+    $stmt->execute();
+    header("Location: content/");
 }
 
 function defaultMethod() {
