@@ -2,6 +2,40 @@
 
 chdir("../");
 include "common.php";
+$db = new SQLite3("database.db");
+$selected = "all";
+
+if (isset($_GET["type"])) {
+    switch ($_GET["type"]) {
+        case "music":
+            $type = "Audio";
+            $selected = "music";
+            break;
+        case "instrument":
+            $type = "Instrument";
+            $selected = "instruments";
+            break;
+        case "video":
+            $type = "Video";
+            $selected = "videos";
+            break;
+    }
+
+    $query = <<<SQL
+        SELECT * FROM `uploads` WHERE `type` = :type ORDER BY `time` DESC
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":type", $type);
+} else {
+    $query = <<<SQL
+        SELECT * FROM `uploads` ORDER BY `time` DESC
+    SQL;
+
+    $stmt = $db->prepare($query);
+}
+
+$result = $stmt->execute();
 
 ?>
 
@@ -68,26 +102,28 @@ include "common.php";
 
                         & > .table {
                             overflow: hidden;
-                            height: 30rem;
 
                             & > .box {
                                 display: grid;
                                 grid-template-columns: repeat(9, max-content);
-                                grid-template-rows: max-content;
-                                height: 100%;
                                 border: 1px solid #555;
                                 border-radius: 1rem;
                                 overflow: auto;
+                                max-height: 30rem;
 
                                 & > .header {
-                                    border-bottom: 1px solid #555;
+                                    position: sticky;
+                                    top: 0;
+                                    background-color: #fff;
+                                    border-bottom: 3px solid #555;
                                     padding-left: 3rem;
                                     padding-right: 3rem;
                                 }
 
                                 & > .data {
                                     border-bottom: 1px solid #555;
-                                    min-width: 5rem;
+                                    padding-left: 3rem;
+                                    padding-right: 3rem;
                                 }
                             }
                         }
@@ -115,7 +151,7 @@ include "common.php";
         <div class="main -main">
             <?=renderHeader("content")?>
             <div class="content">
-                <?=renderNavigation("content", "all")?>
+                <?=renderNavigation("content", $selected)?>
                 <div class="content -pad">
                     <div class="top">
                         <div class="title">
@@ -178,10 +214,12 @@ include "common.php";
                             <div class="actions header -pad -center__flex">
                                 Actions
                             </div>
+                            <?php
+                                while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                                    echo renderContentRow($row);
+                                }
+                            ?>
                         </div>
-                        <?php
-                            // TODO: add render
-                        ?>
                     </div>
                     <div class="stats -pad">
                         <div class="box">
