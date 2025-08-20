@@ -228,3 +228,37 @@ function renderNavigation($type, $selected) {
             break;
     }
 }
+
+function renderContentRow($row) {
+    $date = date("m/d/Y", $row["time"]);
+
+    return <<<HTML
+        <div class="date data -pad -center__flex">
+            {$date}
+        </div>
+        <div class="title data -pad -center__flex">
+            {$row["title"]}
+        </div>
+        <div class="tribe data -pad -center__flex">
+            {$row["tribe"]}
+        </div>
+        <div class="category data -pad -center__flex">
+            {$row["category"]}
+        </div>
+        <div class="type data -pad -center__flex">
+            {$row["type"]}
+        </div>
+        <div class="engagement data -pad -center__flex">
+            0%
+        </div>
+        <div class="webviews data -pad -center__flex">
+            0
+        </div>
+        <div class="appscans data -pad -center__flex">
+            0
+        </div>
+        <div class="actions data -pad -center__flex">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#111111"><path d="M240-400q-33 0-56.5-23.5T160-480q0-33 23.5-56.5T240-560q33 0 56.5 23.5T320-480q0 33-23.5 56.5T240-400Zm240 0q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm240 0q-33 0-56.5-23.5T640-480q0-33 23.5-56.5T720-560q33 0 56.5 23.5T800-480q0 33-23.5 56.5T720-400Z"/></svg>
+        </div>
+    HTML;
+}
