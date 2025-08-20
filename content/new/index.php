@@ -105,7 +105,7 @@ include "common.php";
                                 </div>
                             </div>
                             <div class="upload -pad -center">
-                                <input type="file" id="inputMedia" onchange="inputMedia_change(event)" name="media" required>
+                                <input type="file" id="inputMedia" accept="image/*, video/*, audio/*" onchange="inputMedia_change(event)" name="media" required>
                             </div>
                         </div>
                         <div class="form">
@@ -148,7 +148,7 @@ include "common.php";
                                     Categories
                                 </div>
                                 <div class="input -pad">
-                                    <select name="categories" class="-select">
+                                    <select name="category" class="-select">
                                         <option>
                                             Instrument
                                         </option>
