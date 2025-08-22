@@ -8,7 +8,7 @@ include "common.php";
 <html>
     <head>
         <title>
-            Login
+            Register
         </title>
         <base href="../">
         <link rel="stylesheet" href="style.css">
@@ -173,7 +173,7 @@ include "common.php";
                                 </div>
                                 <div class="input -pad">
                                     <div class="input -center__flex">
-                                        <input type="text" class="-input" name="email" id="inputEmail" placeholder="Enter your email address" required maxlength="20">
+                                        <input type="text" class="-input" name="email" id="inputEmail" placeholder="Enter your email address" required maxlength="50">
                                     </div>
                                     <div class="verify -center__flex" id="panelVerify">
                                         <button class="-button" onclick="btnVerify_click()">
@@ -300,6 +300,9 @@ include "common.php";
 
                     await new Promise(resolve => setTimeout(resolve, 4000));
                 }
+
+                inputEmail.disabled = false;
+                inputEmail.readOnly = true;
 
                 panelVerify.innerHTML = /*html*/`
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>
