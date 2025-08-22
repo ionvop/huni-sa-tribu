@@ -25,6 +25,12 @@ if (isset($_GET["method"])) {
         case "upload":
             upload();
             break;
+        case "edit":
+            edit();
+            break;
+        case "delete":
+            delete();
+            break;
         default:
             defaultMethod();
             break;
@@ -144,8 +150,7 @@ function register() {
     $stmt->bindValue(":username", $_POST["username"]);
     $stmt->bindValue(":hash", $hash);
     $stmt->execute();
-    alert("Account successfully created. Please login.");
-    header("Location: ./");
+    alert("Account successfully created. Please login.", "login/");
 }
 
 function login() {
@@ -236,6 +241,76 @@ function upload() {
     $stmt->bindValue(":category", $_POST["category"]);
     $stmt->bindValue(":type", $_POST["type"]);
     $stmt->bindValue(":file", $filename);
+    $stmt->execute();
+    header("Location: content/");
+}
+
+function edit() {
+    $db = new SQLite3("database.db");
+    $user = getUser();
+
+    if ($user == false) {
+        alert("You must be logged in to edit.");
+    }
+
+    if (strlen($_POST["title"]) <= 0 || strlen($_POST["title"]) > 50) {
+        alert("Title must be between 1 and 50 characters.");
+    }
+
+    if (strlen($_POST["description"]) <= 0 || strlen($_POST["description"]) > 1000) {
+        alert("Description must be between 1 and 1000 characters.");
+    }
+
+    if ($_FILES["media"]["error"] != 4) {
+        if ($_FILES["media"]["error"] != 0) {
+            alert("File could not be uploaded.");
+        }
+
+        $filename = uniqid("upload-") . "." . pathinfo($_FILES["media"]["name"], PATHINFO_EXTENSION);
+
+        if (move_uploaded_file($_FILES["media"]["tmp_name"], "uploads/{$filename}") == false) {
+            alert("File could not be uploaded.");
+        }
+
+        $query = <<<SQL
+            UPDATE `uploads` SET `file` = :file WHERE `id` = :id
+        SQL;
+
+        $stmt = $db->prepare($query);
+        $stmt->bindValue(":file", $filename);
+        $stmt->bindValue(":id", $_POST["id"]);
+        $stmt->execute();
+    }
+
+    $query = <<<SQL
+        UPDATE `uploads` SET `title` = :title, `tribe` = :tribe, `description` = :description, `category` = :category, `type` = :type WHERE `id` = :id
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":title", $_POST["title"]);
+    $stmt->bindValue(":tribe", $_POST["tribe"]);
+    $stmt->bindValue(":description", $_POST["description"]);
+    $stmt->bindValue(":category", $_POST["category"]);
+    $stmt->bindValue(":type", $_POST["type"]);
+    $stmt->bindValue(":id", $_POST["id"]);
+    $stmt->execute();
+    header("Location: content/");
+}
+
+function delete() {
+    $db = new SQLite3("database.db");
+    $user = getUser();
+
+    if ($user == false) {
+        alert("You must be logged in to delete.");
+    }
+
+    $query = <<<SQL
+        DELETE FROM `uploads` WHERE `id` = :id
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":id", $_POST["id"]);
     $stmt->execute();
     header("Location: content/");
 }
