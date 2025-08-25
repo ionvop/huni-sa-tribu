@@ -106,7 +106,8 @@ body {
 .-header {
     display: grid;
     grid-template-columns: 10rem max-content 1fr;
-    background-color: var(--theme-brown);
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("assets/header.jpg");
+    background-size: cover;
     color: #fff;
 
     & > .title {
