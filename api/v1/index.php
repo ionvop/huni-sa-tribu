@@ -6,6 +6,17 @@ include "common.php";
 try {
     $_POST = json_decode(file_get_contents("php://input"), true);
 
+    if (isset($_GET["method"])) {
+        switch ($_GET["method"]) {
+            case "get_content":
+                getContent();
+                break;
+            default:
+                defaultMethod();
+                break;
+        }
+    }
+
     if (isset($_POST["method"])) {
         switch ($_POST["method"]) {
             case "send_email_verification":
@@ -23,6 +34,24 @@ try {
     }
 } catch (Exception $e) {
     echo json_encode(["success" => false, "message" => $e->getMessage()]);
+}
+
+function getContent() {
+    $db = new SQLite3("database.db");
+
+    $query = <<<SQL
+        SELECT * FROM `uploads`
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $result = $stmt->execute();
+    $content = [];
+
+    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+        $content[] = $row;
+    }
+
+    echo json_encode(["success" => true, "content" => $content]);
 }
 
 function sendEmailVerification() {
