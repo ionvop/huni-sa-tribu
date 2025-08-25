@@ -17,8 +17,9 @@ include "common.php";
         <style>
             body > .main {
                 & > .content {
-                    background-image: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)), url("assets/bg.png");
+                    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("assets/register.jpg");
                     background-size: cover;
+                    background-position: bottom;
 
                     & > .form {
                         margin: auto;
