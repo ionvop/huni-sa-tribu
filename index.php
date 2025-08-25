@@ -23,14 +23,17 @@ if ($user == false) {
             body > .main {
                 & > .content {
                     padding: 5rem;
+                    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("assets/login.jpg");
+                    background-size: cover;
+                    background-position: bottom;
 
                     & > .title {
-                        color: #11c36d;
+                        color: #fff;
                         font-weight: bold;
                     }
 
                     & > .description {
-                        color: #555;
+                        color: #fff;
                         font-weight: bold;
                     }
 
@@ -41,7 +44,7 @@ if ($user == false) {
 
                         & > .page {
                             & > .box {
-                                border: 3px solid #555;
+                                background-color: #fff;
                                 border-radius: 1rem;
 
                                 & > .icon {
