@@ -47,8 +47,11 @@ if ($post == false) {
                             & > .media {
                                 display: grid;
                                 grid-template-rows: minmax(0, 1fr) max-content;
+                                overflow: hidden;
 
                                 & > .preview {
+                                    overflow: hidden;
+
                                     & > .box {
                                         box-sizing: border-box;
                                         height: 100%;
