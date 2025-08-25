@@ -34,8 +34,11 @@ include "common.php";
                             & > .media {
                                 display: grid;
                                 grid-template-rows: minmax(0, 1fr) max-content;
+                                overflow: hidden;
 
                                 & > .preview {
+                                    overflow: hidden;
+
                                     & > .box {
                                         box-sizing: border-box;
                                         height: 100%;
@@ -44,6 +47,7 @@ include "common.php";
                                         overflow: hidden;
 
                                         & > img {
+                                            box-sizing: border-box;
                                             max-width: 100%;
                                             max-height: 100%;
                                         }
@@ -153,10 +157,13 @@ include "common.php";
                                             Instrument
                                         </option>
                                         <option>
-                                            Dance
+                                            Video
                                         </option>
                                         <option>
                                             Music
+                                        </option>
+                                        <option>
+                                            Artifact
                                         </option>
                                     </select>
                                 </div>
@@ -168,7 +175,7 @@ include "common.php";
                                 <div class="input -pad">
                                     <select name="type" class="-select">
                                         <option>
-                                            Instrument
+                                            Image
                                         </option>
                                         <option>
                                             Video
