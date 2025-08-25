@@ -229,7 +229,7 @@ function renderNavigation($type, $selected) {
     }
 }
 
-function renderContentRow($row) {
+function renderContentRowOld($row) {
     $date = date("m/d/Y", $row["time"]);
 
     return <<<HTML
@@ -260,5 +260,40 @@ function renderContentRow($row) {
         <a href="content/edit/?id={$row['id']}" class="actions data -pad -center__flex">
             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#111111"><path d="M240-400q-33 0-56.5-23.5T160-480q0-33 23.5-56.5T240-560q33 0 56.5 23.5T320-480q0 33-23.5 56.5T240-400Zm240 0q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm240 0q-33 0-56.5-23.5T640-480q0-33 23.5-56.5T720-560q33 0 56.5 23.5T800-480q0 33-23.5 56.5T720-400Z"/></svg>
         </a>
+    HTML;
+}
+
+function renderContentRow($row) {
+    $date = date("m/d/Y", $row["time"]);
+
+    return <<<HTML
+        <tr>
+            <td class="date data -pad">
+                {$date}
+            </td>
+            <td class="title data -pad">
+                {$row["title"]}
+            </td>
+            <td class="tribe data -pad">
+                {$row["tribe"]}
+            </td>
+            <td class="category data -pad">
+                {$row["category"]}
+            </td>
+            <td class="type data -pad">
+                {$row["type"]}
+            </td>
+            <td class="engagement data -pad">
+                0%
+            </td>
+            <td class="appscans data -pad">
+                0
+            </td>
+            <td class="actions data -pad">
+                <a href="content/edit/?id={$row['id']}">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#111111"><path d="M240-400q-33 0-56.5-23.5T160-480q0-33 23.5-56.5T240-560q33 0 56.5 23.5T320-480q0 33-23.5 56.5T240-400Zm240 0q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm240 0q-33 0-56.5-23.5T640-480q0-33 23.5-56.5T720-560q33 0 56.5 23.5T800-480q0 33-23.5 56.5T720-400Z"/></svg>
+                </a>
+            </td>
+        </tr>
     HTML;
 }
