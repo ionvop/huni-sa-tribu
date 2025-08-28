@@ -30,6 +30,11 @@ $result = $stmt->execute();
                 overflow: hidden;
 
                 & > .content {
+                    display: grid;
+                    grid-template-rows: max-content minmax(0, 1fr);
+                    background-color: #f5fafa;
+                    overflow: hidden;
+                    
                     & > .top {
                         display: grid;
                         grid-template-columns: 1fr max-content;
@@ -44,12 +49,14 @@ $result = $stmt->execute();
                     }
 
                     & > .table {
+                        overflow: hidden;
+
                         & > .box {
+                            height: 100%;
                             border-radius: 1rem;
                             overflow: auto;
                             border: 1px solid #555;
                             background-color: #fff;
-                            min-height: 20rem;
 
                             & > table {
                                 border-collapse: collapse;
@@ -79,8 +86,8 @@ $result = $stmt->execute();
                                             text-align: center;
 
                                             & > img {
-                                                width: 5rem;
-                                                height: 5rem;
+                                                width: 3rem;
+                                                height: 3rem;
                                             }
                                         }
                                     }
