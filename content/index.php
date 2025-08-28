@@ -1,11 +1,17 @@
 <?php
 
 chdir("../");
-include "common.php";
+require_once "common.php";
 $db = new SQLite3("database.db");
 $selected = "all";
 
-$query = "SELECT * FROM `uploads`";
+$query = <<<SQL
+    SELECT * FROM `uploads`
+SQL;
+
+$conditions = [];
+$binds = [];
+$selected = "all";
 
 if (isset($_GET["category"])) {
     switch ($_GET["category"]) {
@@ -14,27 +20,18 @@ if (isset($_GET["category"])) {
         case "video":
         case "artifact":
             $selected = $_GET["category"];
-            $query .= " WHERE `category` = :category";
+            $conditions[] = "`category` = :category";
+            $binds[":category"] = ucfirst($_GET["category"]);
             break;
     }
 }
 
 if (isset($_GET["q"])) {
-    $query .= (strpos($query, "WHERE") === false) ? " WHERE" : " AND";
-    $query .= " `title` LIKE :q OR `description` LIKE :q";
+    $conditions[] = "(`title` LIKE :q OR `description` LIKE :q)";
+    $binds[":q"] = "%{$_GET["q"]}%";
 }
 
-$stmt = $db->prepare($query);
-
-if (isset($_GET["category"])) {
-    $stmt->bindValue(":category", ucfirst($_GET["category"]));
-}
-
-if (isset($_GET["q"])) {
-    $stmt->bindValue(":q", "%{$_GET["q"]}%");
-}
-
-$result = $stmt->execute();
+$result = buildQuery($db, $query, $conditions, $binds);
 
 ?>
 
@@ -52,61 +49,11 @@ $result = $stmt->execute();
                 display: grid;
                 grid-template-columns: max-content 1fr;
                 height: 100%;
-
-                & > .navigation {
-                    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("assets/content.jpg");
-                    color: #fff;
-
-                    & > .back {
-                        cursor: pointer;
-                        transition-duration: 0.1s;
-
-                        &:hover {
-                            background-color: #fff5;
-                        }
-                    }
-
-                    & > .title {
-                        font-weight: bold;
-                    }
-
-                    & > .description {
-                        padding-top: 0rem;
-                        padding-bottom: 3rem;
-                        border-bottom: 1px solid #fff5;
-                    }
-
-                    & > .categories {
-                        & > .title {
-                            padding: 2rem;
-                            font-weight: bold;
-                            color: #fffa;
-                        }
-
-                        & > .tabs {
-                            & > .tab {
-                                cursor: pointer;
-                                transition-duration: 0.1s;
-
-                                & > .box {
-                                    border-radius: 1rem;
-                                }
-
-                                & > .box--selected {
-                                    background-color: #fff;
-                                    color: var(--theme-green);
-                                }
-
-                                &:hover {
-                                    background-color: #fff5;
-                                }
-                            }
-                        }
-                    }
-                }
+                overflow: hidden;
 
                 & > .content {
                     background-color: #f5fafa;
+                    overflow: auto;
 
                     & > .top {
                         display: grid;
@@ -152,27 +99,40 @@ $result = $stmt->execute();
                     & > .table {
                         & > .box {
                             border-radius: 1rem;
-                            overflow: hidden;
+                            overflow: auto;
                             border: 1px solid #555;
+                            height: 20rem;
+                            background-color: #fff;
 
                             & > table {
                                 border-collapse: collapse;
                                 width: 100%;
 
                                 & > thead {
+                                    position: sticky;
+                                    top: 0rem;
+                                    background-color: #f5fafa;
                                     border-bottom: 1px solid #555;
-
-                                    & > tr {
-                                        & > th {
-                                            /* border-bottom: 1px solid #555; */
-                                        }
-                                    }
                                 }
 
                                 & > tbody {
                                     background-color: #fff;
+
+                                    & > tr {
+                                        border-bottom: 1px solid #aaa;
+                                    }
                                 }
                             }
+                        }
+                    }
+
+                    & > .stats {
+                        & > .box {
+                            display: grid;
+                            grid-template-columns: repeat(3, 1fr);
+                            background-color: #fff;
+                            border-radius: 1rem;
+                            border: 1px solid #555;
                         }
                     }
                 }
@@ -181,56 +141,7 @@ $result = $stmt->execute();
     </head>
     <body>
         <div class="main">
-            <div class="navigation">
-                <a href="./" class="-a back -pad">
-                    <div class="-iconlabel">
-                        <div class="icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="m313-440 196 196q12 12 11.5 28T508-188q-12 11-28 11.5T452-188L188-452q-6-6-8.5-13t-2.5-15q0-8 2.5-15t8.5-13l264-264q11-11 27.5-11t28.5 11q12 12 12 28.5T508-715L313-520h447q17 0 28.5 11.5T800-480q0 17-11.5 28.5T760-440H313Z"/></svg>
-                        </div>
-                        <div class="label">
-                            Back to Admin
-                        </div>
-                    </div>
-                </a>
-                <div class="title -pad -title">
-                    Content Management
-                </div>
-                <div class="description -pad">
-                    Manage cultural artifacts and media
-                </div>
-                <div class="categories">
-                    <div class="title -pad">
-                        CONTENT CATEGORIES
-                    </div>
-                    <div class="tabs">
-                        <a href="content/" class="-a all tab -pad">
-                            <div class="box <?=$selected == "all" ? "box--selected" : "" ?> -pad">
-                                All Content
-                            </div>
-                        </a>
-                        <a href="content/?category=music" class="-a music tab -pad">
-                            <div class="box <?=$selected == "music" ? "box--selected" : "" ?> -pad">
-                                Music
-                            </div>
-                        </a>
-                        <a href="content/?category=instrument" class="-a instruments tab -pad">
-                            <div class="box <?=$selected == "instrument" ? "box--selected" : "" ?> -pad">
-                                Instruments
-                            </div>
-                        </a>
-                        <a href="content/?category=video" class="-a videos tab -pad">
-                            <div class="box <?=$selected == "video" ? "box--selected" : "" ?> -pad">
-                                Videos
-                            </div>
-                        </a>
-                        <a href="content/?category=artifact" class="-a artifacts tab -pad">
-                            <div class="box <?=$selected == "artifact" ? "box--selected" : "" ?> -pad">
-                                Artifacts
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
+            <?=renderNavigation("content", $selected)?>
             <div class="content">
                 <div class="top">
                     <div class="title">
@@ -304,6 +215,40 @@ $result = $stmt->execute();
                                 ?>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+                <div class="stats -pad">
+                    <div class="box -pad">
+                        <div class="content stat">
+                            <div class="box">
+                                <div class="value -pad -title -center">
+                                    0
+                                </div>
+                                <div class="label -pad -subtitle -center">
+                                    Total Content
+                                </div>
+                            </div>
+                        </div>
+                        <div class="score stat">
+                            <div class="box">
+                                <div class="value -pad -title -center">
+                                    0
+                                </div>
+                                <div class="label -pad -subtitle -center">
+                                    Total App Score
+                                </div>
+                            </div>
+                        </div>
+                        <div class="engagement stat">
+                            <div class="box">
+                                <div class="value -pad -title -center">
+                                    0%
+                                </div>
+                                <div class="label -pad -subtitle -center">
+                                    Avg. Engagement
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
