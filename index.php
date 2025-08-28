@@ -1,6 +1,6 @@
 <?php
 
-include "common.php";
+require_once "common.php";
 $user = getUser();
 
 if ($user == false) {
@@ -270,11 +270,11 @@ if ($user == false) {
                                     </div>
                                 </div>
                             </div>
-                            <div class="button -pad">
+                            <a href="visitor/" class="-a button -pad">
                                 <button class="-button">
                                     Access Visitor Management
                                 </button>
-                            </div>
+                            </a>
                         </div>
                     </div>
                 </div>
