@@ -1,6 +1,6 @@
 <?php
 
-include "common.php";
+require_once "common.php";
 
 if (isset($_GET["method"])) {
     switch ($_GET["method"]) {
@@ -30,6 +30,15 @@ if (isset($_GET["method"])) {
             break;
         case "delete":
             delete();
+            break;
+        case "new_qr":
+            newQr();
+            break;
+        case "edit_qr":
+            editQr();
+            break;
+        case "delete_qr":
+            deleteQr();
             break;
         default:
             defaultMethod();
@@ -228,6 +237,16 @@ function upload() {
         alert("File could not be uploaded.");
     }
 
+    $type = "";
+
+    if (strpos(mime_content_type("uploads/{$filename}"), "image/") === 0) {
+        $type = "Image";
+    } else if (strpos(mime_content_type("uploads/{$filename}"), "video/") === 0) {
+        $type = "Video";
+    } else if (strpos(mime_content_type("uploads/{$filename}"), "audio/") === 0) {
+        $type = "Audio";
+    }
+
     $query = <<<SQL
         INSERT INTO `uploads` (`user_id`, `title`, `tribe`, `description`, `category`, `type`, `file`)
         VALUES (:user_id, :title, :tribe, :description, :category, :type, :file)
@@ -239,7 +258,7 @@ function upload() {
     $stmt->bindValue(":tribe", $_POST["tribe"]);
     $stmt->bindValue(":description", $_POST["description"]);
     $stmt->bindValue(":category", $_POST["category"]);
-    $stmt->bindValue(":type", $_POST["type"]);
+    $stmt->bindValue(":type", $type);
     $stmt->bindValue(":file", $filename);
     $stmt->execute();
     header("Location: content/");
@@ -260,6 +279,15 @@ function edit() {
     if (strlen($_POST["description"]) <= 0 || strlen($_POST["description"]) > 1000) {
         alert("Description must be between 1 and 1000 characters.");
     }
+
+    $query = <<<SQL
+        SELECT * FROM `uploads` WHERE `id` = :id
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":id", $_POST["id"]);
+    $post = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+    $filename = $post["file"];
 
     if ($_FILES["media"]["error"] != 4) {
         if ($_FILES["media"]["error"] != 0) {
@@ -282,6 +310,16 @@ function edit() {
         $stmt->execute();
     }
 
+    $type = "";
+
+    if (strpos(mime_content_type("uploads/{$filename}"), "image/") === 0) {
+        $type = "Image";
+    } else if (strpos(mime_content_type("uploads/{$filename}"), "video/") === 0) {
+        $type = "Video";
+    } else if (strpos(mime_content_type("uploads/{$filename}"), "audio/") === 0) {
+        $type = "Audio";
+    }
+
     $query = <<<SQL
         UPDATE `uploads` SET `title` = :title, `tribe` = :tribe, `description` = :description, `category` = :category, `type` = :type WHERE `id` = :id
     SQL;
@@ -291,7 +329,7 @@ function edit() {
     $stmt->bindValue(":tribe", $_POST["tribe"]);
     $stmt->bindValue(":description", $_POST["description"]);
     $stmt->bindValue(":category", $_POST["category"]);
-    $stmt->bindValue(":type", $_POST["type"]);
+    $stmt->bindValue(":type", $type);
     $stmt->bindValue(":id", $_POST["id"]);
     $stmt->execute();
     header("Location: content/");
@@ -313,6 +351,50 @@ function delete() {
     $stmt->bindValue(":id", $_POST["id"]);
     $stmt->execute();
     header("Location: content/");
+}
+
+function newQr() {
+    $db = new SQLite3("database.db");
+    $code = uniqid("qr-");
+
+    $query = <<<SQL
+        INSERT INTO `qr` (`code`) VALUES (:code)
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":code", $code);
+    $stmt->execute();
+    $id = $db->lastInsertRowID();
+    header("Location: visitor/qr/edit/?id={$id}");
+}
+
+function editQr() {
+    $db = new SQLite3("database.db");
+
+    $query = <<<SQL
+        UPDATE `qr` SET `name` = :name, `type` = :type, `status` = :status WHERE `id` = :id
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":name", $_POST["name"]);
+    $stmt->bindValue(":type", $_POST["type"]);
+    $stmt->bindValue(":status", $_POST["status"]);
+    $stmt->bindValue(":id", $_POST["id"]);
+    $stmt->execute();
+    header("Location: visitor/qr/");
+}
+
+function deleteQr() {
+    $db = new SQLite3("database.db");
+
+    $query = <<<SQL
+        DELETE FROM `qr` WHERE `id` = :id
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":id", $_POST["id"]);
+    $stmt->execute();
+    header("Location: visitor/qr/");
 }
 
 function defaultMethod() {
