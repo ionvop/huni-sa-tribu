@@ -25,7 +25,7 @@ Open `config.php` and insert your personal Brevo API key:
 $BREVO_API_KEY = "your_api_key_here";
 ```
 
-The email verification flow (`api/v1/index.php`) sends emails through the Brevo (formerly Sendinblue) SMTP API.
+The email verification flow (`api/index.php`) sends emails through the Brevo (formerly Sendinblue) SMTP API.
 Without a valid API key, the server cannot send verification emails to users.
 
 ---
