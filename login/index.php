@@ -1,7 +1,7 @@
 <?php
 
 chdir("../");
-include "common.php";
+require_once "common.php";
 
 ?>
 
