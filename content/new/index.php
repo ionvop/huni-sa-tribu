@@ -1,7 +1,7 @@
 <?php
 
 chdir("../../");
-include "common.php";
+require_once "common.php";
 
 ?>
 
@@ -16,68 +16,67 @@ include "common.php";
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
             body > .main {
+                display: grid;
+                grid-template-columns: max-content 1fr;
+                height: 100%;
+                overflow: hidden;
+
                 & > .content {
-                    display: grid;
-                    grid-template-columns: max-content 1fr;
                     overflow: hidden;
                 
-                    & > .content {
-                        overflow: hidden;
+                    & > .box {
+                        display: grid;
+                        grid-template-columns: repeat(2, 1fr);
+                        height: 100%;
+                        border: 3px solid #555;
+                        border-radius: 1rem;
 
-                        & > .box {
+                        & > .media {
                             display: grid;
-                            grid-template-columns: repeat(2, 1fr);
-                            height: 100%;
-                            border: 3px solid #555;
-                            border-radius: 1rem;
+                            grid-template-rows: minmax(0, 1fr) max-content;
+                            overflow: hidden;
 
-                            & > .media {
-                                display: grid;
-                                grid-template-rows: minmax(0, 1fr) max-content;
+                            & > .preview {
                                 overflow: hidden;
 
-                                & > .preview {
+                                & > .box {
+                                    box-sizing: border-box;
+                                    height: 100%;
+                                    border: 1px solid #555;
+                                    border-radius: 1rem;
                                     overflow: hidden;
 
-                                    & > .box {
+                                    & > img {
                                         box-sizing: border-box;
-                                        height: 100%;
-                                        border: 1px solid #555;
-                                        border-radius: 1rem;
-                                        overflow: hidden;
+                                        max-width: 100%;
+                                        max-height: 100%;
+                                    }
 
-                                        & > img {
-                                            box-sizing: border-box;
-                                            max-width: 100%;
-                                            max-height: 100%;
-                                        }
-
-                                        & > video {
-                                            max-width: 100%;
-                                            max-height: 100%;
-                                        }
+                                    & > video {
+                                        max-width: 100%;
+                                        max-height: 100%;
                                     }
                                 }
                             }
+                        }
 
-                            & > .form {
-                                overflow: auto;
+                        & > .form {
+                            overflow: auto;
 
-                                & > .field {
-                                    & > .input {
-                                        padding-top: 0rem;
-                                    }
+                            & > .field {
+                                & > .input {
+                                    padding-top: 0rem;
                                 }
+                            }
 
-                                & > .submit {
-                                    display: grid;
-                                    grid-template-columns: 1fr max-content;
+                            & > .submit {
+                                display: grid;
+                                grid-template-columns: 1fr max-content;
 
-                                    & > .button {
-                                        & > button {
-                                            background-color: var(--theme-green-dark);
-                                            color: #fff;
-                                        }
+                                & > .button {
+                                    & > button {
+                                        background-color: var(--theme-green-dark);
+                                        color: #fff;
                                     }
                                 }
                             }
@@ -93,110 +92,99 @@ include "common.php";
             .-select {
                 border: 1px solid #555;
             }
+
+            .-textarea {
+                border: 1px solid #555;
+            }
         </style>
     </head>
     <body>
-        <div class="main -main">
-            <?=renderHeader("content")?>
-            <div class="content">
-                <?=renderNavigation("content", "")?>
-                <div class="content -pad">
-                    <form action="server.php" class="-form box" method="post" enctype="multipart/form-data">
-                        <div class="media">
-                            <div class="preview -pad">
-                                <div class="box -pad -center__flex" id="panelMedia">
+        <div class="main">
+            <?=renderNavigation("content", "new")?>
+            <div class="content -pad">
+                <form action="server.php" class="-form box" method="post" enctype="multipart/form-data">
+                    <div class="media">
+                        <div class="preview -pad">
+                            <div class="box -pad -center__flex" id="panelMedia">
 
-                                </div>
-                            </div>
-                            <div class="upload -pad -center">
-                                <input type="file" id="inputMedia" accept="image/*, video/*, audio/*" onchange="inputMedia_change(event)" name="media" required>
                             </div>
                         </div>
-                        <div class="form">
-                            <div class="title field">
-                                <div class="label -pad">
-                                    Title
-                                </div>
-                                <div class="input -pad">
-                                    <input type="text" class="-input" name="title" required>
-                                </div>
+                        <div class="upload -pad -center">
+                            <input type="file" id="inputMedia" accept="image/*, video/*, audio/*" onchange="inputMedia_change(event)" name="media" required>
+                        </div>
+                    </div>
+                    <div class="form">
+                        <div class="title field">
+                            <div class="label -pad">
+                                Title
                             </div>
-                            <div class="tribe field">
-                                <div class="label -pad">
-                                    Tribe
-                                </div>
-                                <div class="input -pad">
-                                    <select name="tribe" class="-select">
-                                        <option>
-                                            Ata-Manobo
-                                        </option>
-                                        <option>
-                                            Mandaya
-                                        </option>
-                                        <option>
-                                            Mansaka
-                                        </option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="description field">
-                                <div class="label -pad">
-                                    Description
-                                </div>
-                                <div class="input -pad">
-                                    <input type="text" class="-input" name="description">
-                                </div>
-                            </div>
-                            <div class="categories field">
-                                <div class="label -pad">
-                                    Categories
-                                </div>
-                                <div class="input -pad">
-                                    <select name="category" class="-select">
-                                        <option>
-                                            Instrument
-                                        </option>
-                                        <option>
-                                            Video
-                                        </option>
-                                        <option>
-                                            Music
-                                        </option>
-                                        <option>
-                                            Artifact
-                                        </option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="type field">
-                                <div class="label -pad">
-                                    Type
-                                </div>
-                                <div class="input -pad">
-                                    <select name="type" class="-select">
-                                        <option>
-                                            Image
-                                        </option>
-                                        <option>
-                                            Video
-                                        </option>
-                                        <option>
-                                            Audio
-                                        </option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="submit">
-                                <div></div>
-                                <div class="button -pad">
-                                    <button class="-button" name="method" value="upload">
-                                        Upload
-                                    </button>
-                                </div>
+                            <div class="input -pad">
+                                <input type="text" class="-input" name="title" placeholder="Add title" required>
                             </div>
                         </div>
-                    </form>
-                </div>
+                        <div class="tribe field">
+                            <div class="label -pad">
+                                Tribe
+                            </div>
+                            <div class="input -pad">
+                                <select name="tribe" class="-select" required>
+                                    <option value="">
+                                        Select Tribe
+                                    </option>
+                                    <option>
+                                        Ata-Manobo
+                                    </option>
+                                    <option>
+                                        Mandaya
+                                    </option>
+                                    <option>
+                                        Mansaka
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="description field">
+                            <div class="label -pad">
+                                Description
+                            </div>
+                            <div class="input -pad">
+                                 <textarea name="description" class="-textarea" placeholder="Add description"></textarea>
+                            </div>
+                        </div>
+                        <div class="categories field">
+                            <div class="label -pad">
+                                Categories
+                            </div>
+                            <div class="input -pad">
+                                <select name="category" class="-select" required>
+                                    <option value="">
+                                        Select Category
+                                    </option>
+                                    <option>
+                                        Instrument
+                                    </option>
+                                    <option>
+                                        Video
+                                    </option>
+                                    <option>
+                                        Music
+                                    </option>
+                                    <option>
+                                        Artifact
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="submit">
+                            <div></div>
+                            <div class="button -pad">
+                                <button class="-button" name="method" value="upload">
+                                    Upload
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
         <script src="script.js"></script>
