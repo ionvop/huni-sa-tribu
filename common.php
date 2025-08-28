@@ -1,6 +1,6 @@
 <?php
 
-include "config.php";
+require_once "config.php";
 
 /**
  * Prints the given message and exits the script.
@@ -181,7 +181,7 @@ function renderHeader($type) {
 
 function renderNavigation($type, $selected) {
     switch ($type) {
-        case "content":
+        case "content_old":
             $allSelected = "";
             $musicSelected = "";
             $instrumentsSelected = "";
@@ -224,8 +224,132 @@ function renderNavigation($type, $selected) {
                     </a>
                 </div>
             HTML;
+        case "content":
+            $allSelected = "";
+            $musicSelected = "";
+            $instrumentsSelected = "";
+            $videosSelected = "";
+            $artifactsSelected = "";
 
-            break;
+            if ($selected == "all") {
+                $allSelected = "box--selected";
+            } else if ($selected == "music") {
+                $musicSelected = "box--selected";
+            } else if ($selected == "instrument") {
+                $instrumentsSelected = "box--selected";
+            } else if ($selected == "video") {
+                $videosSelected = "box--selected";
+            } else if ($selected == "artifact") {
+                $artifactsSelected = "box--selected";
+            }
+
+            return <<<HTML
+                <div class="-navigation -navigation--content">
+                    <a href="./" class="-a back -pad">
+                        <div class="-iconlabel">
+                            <div class="icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="m313-440 196 196q12 12 11.5 28T508-188q-12 11-28 11.5T452-188L188-452q-6-6-8.5-13t-2.5-15q0-8 2.5-15t8.5-13l264-264q11-11 27.5-11t28.5 11q12 12 12 28.5T508-715L313-520h447q17 0 28.5 11.5T800-480q0 17-11.5 28.5T760-440H313Z"/></svg>
+                            </div>
+                            <div class="label">
+                                Back to Admin
+                            </div>
+                        </div>
+                    </a>
+                    <div class="title -pad -title">
+                        Content Management
+                    </div>
+                    <div class="description -pad">
+                        Manage cultural artifacts and media
+                    </div>
+                    <div class="categories">
+                        <div class="title -pad">
+                            CONTENT CATEGORIES
+                        </div>
+                        <div class="tabs">
+                            <a href="content/" class="-a all tab -pad">
+                                <div class="box {$allSelected} -pad">
+                                    All Content
+                                </div>
+                            </a>
+                            <a href="content/?category=music" class="-a music tab -pad">
+                                <div class="box {$musicSelected} -pad">
+                                    Music
+                                </div>
+                            </a>
+                            <a href="content/?category=instrument" class="-a instruments tab -pad">
+                                <div class="box {$instrumentsSelected} -pad">
+                                    Instruments
+                                </div>
+                            </a>
+                            <a href="content/?category=video" class="-a videos tab -pad">
+                                <div class="box {$videosSelected} -pad">
+                                    Videos
+                                </div>
+                            </a>
+                            <a href="content/?category=artifact" class="-a artifacts tab -pad">
+                                <div class="box {$artifactsSelected} -pad">
+                                    Artifacts
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            HTML;
+        case "visitor":
+            $visitorSelected = "";
+            $qrSelected = "";
+            $analyticsSelected = "";
+
+            if ($selected == "visitor") {
+                $visitorSelected = "box--selected";
+            } else if ($selected == "qr") {
+                $qrSelected = "box--selected";
+            } else if ($selected == "analytics") {
+                $analyticsSelected = "box--selected";
+            }
+
+            return <<<HTML
+                <div class="-navigation -navigation--visitor">
+                    <a href="./" class="-a back -pad">
+                        <div class="-iconlabel">
+                            <div class="icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="m313-440 196 196q12 12 11.5 28T508-188q-12 11-28 11.5T452-188L188-452q-6-6-8.5-13t-2.5-15q0-8 2.5-15t8.5-13l264-264q11-11 27.5-11t28.5 11q12 12 12 28.5T508-715L313-520h447q17 0 28.5 11.5T800-480q0 17-11.5 28.5T760-440H313Z"/></svg>
+                            </div>
+                            <div class="label">
+                                Back to Admin
+                            </div>
+                        </div>
+                    </a>
+                    <div class="title -pad -title">
+                        Visitor Management
+                    </div>
+                    <div class="description -pad">
+                        Visitors Engagement and Activities
+                    </div>
+                    <div class="categories">
+                        <div class="title -pad">
+                            VISITOR CATEGORIES
+                        </div>
+                        <div class="tabs">
+                            <a href="visitor/" class="-a all tab -pad">
+                                <div class="box {$visitorSelected} -pad">
+                                    Visitors
+                                </div>
+                            </a>
+                            <a href="visitor/qr/" class="-a music tab -pad">
+                                <div class="box {$qrSelected} -pad">
+                                    QR Codes
+                                </div>
+                            </a>
+                            <a href="visitor/analytics/" class="-a instruments tab -pad">
+                                <div class="box {$analyticsSelected} -pad">
+                                    Analytics
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            HTML;
     }
 }
 
@@ -268,32 +392,48 @@ function renderContentRow($row) {
 
     return <<<HTML
         <tr>
-            <td class="date data -pad">
+            <td class="date data -pad -center">
                 {$date}
             </td>
-            <td class="title data -pad">
+            <td class="title data -pad -center">
                 {$row["title"]}
             </td>
-            <td class="tribe data -pad">
+            <td class="tribe data -pad -center">
                 {$row["tribe"]}
             </td>
-            <td class="category data -pad">
+            <td class="category data -pad -center">
                 {$row["category"]}
             </td>
-            <td class="type data -pad">
+            <td class="type data -pad -center">
                 {$row["type"]}
             </td>
-            <td class="engagement data -pad">
+            <td class="engagement data -pad -center">
                 0%
             </td>
-            <td class="appscans data -pad">
+            <td class="appscans data -pad -center">
                 0
             </td>
-            <td class="actions data -pad">
+            <td class="actions data -pad -center">
                 <a href="content/edit/?id={$row['id']}">
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#111111"><path d="M240-400q-33 0-56.5-23.5T160-480q0-33 23.5-56.5T240-560q33 0 56.5 23.5T320-480q0 33-23.5 56.5T240-400Zm240 0q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm240 0q-33 0-56.5-23.5T640-480q0-33 23.5-56.5T720-560q33 0 56.5 23.5T800-480q0 33-23.5 56.5T720-400Z"/></svg>
                 </a>
             </td>
         </tr>
     HTML;
+}
+
+function buildQuery(SQLite3 $db, string $query, array $conditons = [], array $binds = [], string $options = ""): SQLite3Result|false {
+    if (count($conditons) > 0) {
+        $query .= " WHERE " . implode(" AND ", $conditons);
+    }
+
+    $query .= " {$options}";
+    $stmt = $db->prepare($query);
+
+    foreach ($binds as $key => $value) {
+        $stmt->bindValue($key, $value);
+    }
+
+    $result = $stmt->execute();
+    return $result;
 }
