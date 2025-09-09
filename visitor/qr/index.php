@@ -158,6 +158,28 @@ $result = $stmt->execute();
                                     while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
                                         $row["name"] = htmlentities($row["name"]);
 
+                                        $query = <<<SQL
+                                            SELECT COUNT(*) FROM `qr_scans` WHERE `qr_id` = :qr_id
+                                        SQL;
+
+                                        $stmt = $db->prepare($query);
+                                        $stmt->bindValue(":qr_id", $row["id"]);
+                                        $count = $stmt->execute()->fetchArray(SQLITE3_NUM)[0];
+
+                                        $query = <<<SQL
+                                            SELECT * FROM `qr_scans` WHERE `qr_id` = :qr_id ORDER BY `time` DESC LIMIT 1
+                                        SQL;
+
+                                        $stmt = $db->prepare($query);
+                                        $stmt->bindValue(":qr_id", $row["id"]);
+                                        $scan = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+
+                                        if ($scan == false) {
+                                            $date = "Never";
+                                        } else {
+                                            $date = date("Y-m-d h:i A", $scan["time"] + 8 * 3600);
+                                        }
+
                                         echo <<<HTML
                                             <tr>
                                                 <td>
@@ -170,10 +192,10 @@ $result = $stmt->execute();
                                                     <img src="" data-code="{$row['code']}">
                                                 </td>
                                                 <td>
-                                                    0
+                                                    $count
                                                 </td>
                                                 <td>
-                                                    2001-09-11
+                                                    $date
                                                 </td>
                                                 <td>
                                                     {$row["status"]}
