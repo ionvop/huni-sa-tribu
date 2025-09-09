@@ -2,6 +2,9 @@
 
 chdir("../../");
 require_once "common.php";
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
 $db = new SQLite3("database.db");
 $_POST = json_decode(file_get_contents("php://input"), true);
 
@@ -11,10 +14,20 @@ if (isset($_GET["id"])) {
     SQL;
 
     $stmt = $db->prepare($query);
-    $stmt->bindValue(":id", $_GET["id"]);    
+    $stmt->bindValue(":id", $_GET["id"]);
     $content = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
     echo json_encode($content);
     exit();
+} else if (isset($_GET["category"])) {
+    $query = <<<SQL
+        SELECT * FROM `uploads` WHERE `category` = :category
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":category", $_GET["category"]);    
+    $content = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+    echo json_encode($content);
+    exit;
 } else {
     $content = [];
 
