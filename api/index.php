@@ -55,7 +55,7 @@ function getContent() {
 }
 
 function sendEmailVerification() {
-    global $BREVO_API_KEY;
+    global $BREVO_API_KEY, $BREVO_SENDER_EMAIL, $DOMAIN_NAME;
     $db = new SQLite3("database.db");
 
     $query = <<<SQL
@@ -76,9 +76,7 @@ function sendEmailVerification() {
     $stmt->bindValue(":code", $code);
     $stmt->execute();
     $email = urlencode($_POST["email"]);
-    // $domain = $_SERVER["SERVER_NAME"];
-    $domain = "{$_SERVER['SERVER_NAME']}:{$_SERVER['SERVER_PORT']}";
-    $url = "http://{$domain}/server.php?method=verify&email={$email}&code={$code}";
+    $url = "http://{$DOMAIN_NAME}/server.php?method=verify&email={$email}&code={$code}";
 
     $headers = [
         "Content-Type: application/json",
@@ -89,7 +87,7 @@ function sendEmailVerification() {
     $body = [
         "sender" => [
             "name" => "Huni sa Tribu",
-            "email" => "ionvop@gmail.com"
+            "email" => $BREVO_SENDER_EMAIL
         ],
         "to" => [
             [
