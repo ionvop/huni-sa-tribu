@@ -21,7 +21,7 @@ if (isset($_GET["category"])) {
         case "artifact":
             $selected = $_GET["category"];
             $conditions[] = "`category` = :category";
-            $binds[":category"] = ucfirst($_GET["category"]);
+            $binds[":category"] = $_GET["category"];
             break;
     }
 }
@@ -32,6 +32,25 @@ if (isset($_GET["q"])) {
 }
 
 $result = buildQuery($db, $query, $conditions, $binds);
+
+$tribeMap = [
+    "ata-manobo" => "Ata-Manobo",
+    "mandaya" => "Mandaya",
+    "mansaka" => "Mansaka"
+];
+
+$categoryMap = [
+    "instrument" => "Instrument",
+    "music" => "Music",
+    "video" => "Video",
+    "artifact" => "Artifact"
+];
+
+$typeMap = [
+    "image" => "Image",
+    "video" => "Video",
+    "audio" => "Audio"
+]
 
 ?>
 
@@ -227,13 +246,13 @@ $result = buildQuery($db, $query, $conditions, $binds);
                                                     {$row["title"]}
                                                 </td>
                                                 <td>
-                                                    {$row["tribe"]}
+                                                    {$tribeMap[$row["tribe"]]}
                                                 </td>
                                                 <td>
-                                                    {$row["category"]}
+                                                    {$categoryMap[$row["category"]]}
                                                 </td>
                                                 <td>
-                                                    {$row["type"]}
+                                                    {$typeMap[$row["type"]]}
                                                 </td>
                                                 <td>
                                                     0%
