@@ -7,7 +7,7 @@ $user = getUser();
 
 if ($user == false) {
     header("Location: login/");
-    exit();
+    exit;
 }
 
 if (isset($_GET["id"]) == false) {
@@ -115,7 +115,7 @@ $qr = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
                                 Name
                             </div>
                             <div class="input -pad">
-                                <input class="-input" name="name" value="<?=htmlentities($qr["name"])?>" placeholder="Enter name">
+                                <input class="-input" name="name" value="<?=htmlentities($qr["name"])?>" placeholder="Enter name" id="inputName">
                             </div>
                         </div>
                         <div class="type field">
@@ -123,23 +123,31 @@ $qr = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
                                 Type
                             </div>
                             <div class="input -pad">
-                                <select name="type" class="-select" value="<?=$qr["type"]?>">
-                                    <option>
+                                <select name="type" class="-select" value="<?=$qr["type"]?>" id="selectType">
+                                    <option value="entrance">
                                         Entrance
                                     </option>
-                                    <option>
+                                    <option value="music">
                                         Music
                                     </option>
-                                    <option>
+                                    <option value="instrument">
                                         Instrument
                                     </option>
-                                    <option>
+                                    <option value="video">
                                         Video
                                     </option>
-                                    <option>
+                                    <option value="artifact">
                                         Artifact
                                     </option>
                                 </select>
+                            </div>
+                        </div>
+                        <div class="content field" style="display: none;" id="panelContent">
+                            <div class="label -pad">
+                                Content
+                            </div>
+                            <div class="input -pad">
+                                <select name="content" class="-select" id="selectContent"></select>
                             </div>
                         </div>
                         <div class="status field">
@@ -148,10 +156,10 @@ $qr = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
                             </div>
                             <div class="input -pad">
                                 <select name="status" class="-select" value="<?=$qr["status"]?>">
-                                    <option>
+                                    <option value="active">
                                         Active
                                     </option>
-                                    <option>
+                                    <option value="inactive">
                                         Inactive
                                     </option>
                                 </select>
@@ -181,6 +189,10 @@ $qr = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
             let formEdit = document.getElementById("formEdit");
             let imgQr = document.getElementById("imgQr");
             let qrContent = <?=json_encode($qr["code"])?>;
+            let inputName = document.getElementById("inputName");
+            let selectType = document.getElementById("selectType");
+            let panelContent = document.getElementById("panelContent");
+            let selectContent = document.getElementById("selectContent");
 
             QRCode.toDataURL(qrContent, (err, url) => {
                 if (err) {
@@ -201,6 +213,39 @@ $qr = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
                 input.value = "delete_qr";
                 formEdit.appendChild(input);
                 formEdit.submit();
+            }
+
+            selectType.onchange = async () => {
+                if (selectType.value == "entrance") {
+                    panelContent.style.display = "none";
+                    return;
+                }
+
+                panelContent.style.display = "block";
+                let response = await fetch("api/content/?category=" + selectType.value);
+                let json = await response.json();
+                console.log(json);
+
+                if (response.ok == false) {
+                    alert(json.error);
+                    return;
+                }
+
+                selectContent.innerHTML = "";
+
+                for (let content of json) {
+                    let option = document.createElement("option");
+                    option.value = content["id"];
+                    option.textContent = content["title"];
+                    selectContent.appendChild(option);
+                }
+
+                selectContent.onchange();
+            }
+        
+            selectContent.onchange = () => {
+                let option = selectContent.options[selectContent.selectedIndex];
+                inputName.value = option.textContent;
             }
         </script>
     </body>
