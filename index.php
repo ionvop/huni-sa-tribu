@@ -5,7 +5,7 @@ $user = getUser();
 
 if ($user == false) {
     header("Location: login/");
-    exit();
+    exit;
 }
 
 ?>
