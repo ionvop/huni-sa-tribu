@@ -11,7 +11,7 @@ require_once "config.php";
 function breakpoint($message) {
     header("Content-type: application/json");
     print_r($message);
-    exit();
+    exit;
 }
 
 /**
@@ -43,7 +43,7 @@ function alert($message, $redirect = "") {
         </script>
     HTML;
 
-    exit();
+    exit;
 }
 
 /**
