@@ -168,13 +168,13 @@ if ($post == false) {
                             </div>
                             <div class="input -pad">
                                 <select name="tribe" class="-select" value="<?=htmlentities($post["tribe"])?>">
-                                    <option>
+                                    <option value="ata-manobo">
                                         Ata-Manobo
                                     </option>
-                                    <option>
+                                    <option value="mandaya">
                                         Mandaya
                                     </option>
-                                    <option>
+                                    <option value="mansaka">
                                         Mansaka
                                     </option>
                                 </select>
@@ -194,14 +194,17 @@ if ($post == false) {
                             </div>
                             <div class="input -pad">
                                 <select name="category" class="-select" value="<?=htmlentities($post["category"])?>">
-                                    <option>
+                                     <option value="instrument">
                                         Instrument
                                     </option>
-                                    <option>
-                                        Dance
+                                    <option value="video">
+                                        Video
                                     </option>
-                                    <option>
+                                    <option value="music">
                                         Music
+                                    </option>
+                                    <option value="artifact">
+                                        Artifact
                                     </option>
                                 </select>
                             </div>
