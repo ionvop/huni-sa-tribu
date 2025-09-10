@@ -131,13 +131,13 @@ require_once "common.php";
                                     <option value="">
                                         Select Tribe
                                     </option>
-                                    <option>
+                                    <option value="ata-manobo">
                                         Ata-Manobo
                                     </option>
-                                    <option>
+                                    <option value="mandaya">
                                         Mandaya
                                     </option>
-                                    <option>
+                                    <option value="mansaka">
                                         Mansaka
                                     </option>
                                 </select>
@@ -160,16 +160,16 @@ require_once "common.php";
                                     <option value="">
                                         Select Category
                                     </option>
-                                    <option>
+                                    <option value="instrument">
                                         Instrument
                                     </option>
-                                    <option>
+                                    <option value="video">
                                         Video
                                     </option>
-                                    <option>
+                                    <option value="music">
                                         Music
                                     </option>
-                                    <option>
+                                    <option value="artifact">
                                         Artifact
                                     </option>
                                 </select>
