@@ -208,7 +208,7 @@ function logout() {
     $stmt->execute();
     setcookie("session", "", time() - 3600);
     header("Location: ./");
-    exit();
+    exit;
 }
 
 function upload() {
@@ -240,11 +240,11 @@ function upload() {
     $type = "";
 
     if (strpos(mime_content_type("uploads/{$filename}"), "image/") === 0) {
-        $type = "Image";
+        $type = "image";
     } else if (strpos(mime_content_type("uploads/{$filename}"), "video/") === 0) {
-        $type = "Video";
+        $type = "video";
     } else if (strpos(mime_content_type("uploads/{$filename}"), "audio/") === 0) {
-        $type = "Audio";
+        $type = "audio";
     }
 
     $query = <<<SQL
@@ -313,11 +313,11 @@ function edit() {
     $type = "";
 
     if (strpos(mime_content_type("uploads/{$filename}"), "image/") === 0) {
-        $type = "Image";
+        $type = "image";
     } else if (strpos(mime_content_type("uploads/{$filename}"), "video/") === 0) {
-        $type = "Video";
+        $type = "video";
     } else if (strpos(mime_content_type("uploads/{$filename}"), "audio/") === 0) {
-        $type = "Audio";
+        $type = "audio";
     }
 
     $query = <<<SQL
