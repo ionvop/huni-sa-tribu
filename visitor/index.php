@@ -2,6 +2,7 @@
 
 chdir("../");
 require_once "common.php";
+$db = new SQLite3("database.db");
 
 ?>
 
@@ -27,7 +28,7 @@ require_once "common.php";
 
                     & > .cards {
                         display: grid;
-                        grid-template-columns: repeat(4, 1fr);
+                        grid-template-columns: repeat(3, 1fr);
 
                         & > .card {
                             & > .box {
@@ -71,6 +72,11 @@ require_once "common.php";
 
                                         & > tr {
                                             border-bottom: 1px solid #aaa;
+
+                                            & > td {
+                                                padding: 1rem;
+                                                text-align: center;
+                                            }
                                         }
                                     }
                                 }
@@ -98,7 +104,15 @@ require_once "common.php";
                                 Total Visitors
                             </div>
                             <div class="value -pad -title">
-                                0
+                                <?php
+                                    $query = <<<SQL
+                                        SELECT COUNT(*) FROM (SELECT * FROM `qr_scans` GROUP BY `name`)
+                                    SQL;
+
+                                    $stmt = $db->prepare($query);
+                                    $totalVisitors = $stmt->execute()->fetchArray(SQLITE3_NUM)[0];
+                                    echo $totalVisitors;
+                                ?>
                             </div>
                             <div class="details -pad -subtitle">
                                 +0% from last week
@@ -111,23 +125,20 @@ require_once "common.php";
                                 Content Interactions
                             </div>
                             <div class="value -pad -title">
-                                0
+                                <?php
+                                    $query = <<<SQL
+                                        SELECT COUNT(*) FROM `qr_scans`
+                                        LEFT JOIN `qr` ON `qr_scans`.`qr_id` = `qr`.`id`
+                                        WHERE `qr`.`type` != "entrance"
+                                    SQL;
+
+                                    $stmt = $db->prepare($query);
+                                    $result = $stmt->execute();
+                                    echo $result->fetchArray(SQLITE3_NUM)[0];
+                                ?>
                             </div>
                             <div class="details -pad -subtitle">
                                 App interactions
-                            </div>
-                        </div>
-                    </div>
-                    <div class="score card -pad">
-                        <div class="box">
-                            <div class="label -pad">
-                                Total App Score
-                            </div>
-                            <div class="value -pad -title">
-                                0 min
-                            </div>
-                            <div class="details -pad -subtitle">
-                                +0 min from last week
                             </div>
                         </div>
                     </div>
@@ -137,7 +148,27 @@ require_once "common.php";
                                 Return Visitors
                             </div>
                             <div class="value -pad -title">
-                                0%
+                                <?php
+                                    $query = <<<SQL
+                                        SELECT COUNT(*) AS `returning_visitors`
+                                        FROM (
+                                            SELECT *
+                                            FROM (
+                                                SELECT `qr_scans`.`name` AS `name`
+                                                FROM `qr_scans`
+                                                LEFT JOIN `qr` ON `qr_scans`.`qr_id` = `qr`.`id`
+                                                WHERE `qr`.`type` = "entrance"
+                                            )
+                                            GROUP BY `name`
+                                            HAVING COUNT(*) > 1
+                                        )
+                                    SQL;
+
+                                    $stmt = $db->prepare($query);
+                                    $result = $stmt->execute();
+                                    $returningVisitors = $result->fetchArray(SQLITE3_ASSOC)["returning_visitors"];
+                                    echo round(($returningVisitors / $totalVisitors) * 100, 2) . "%";
+                                ?>
                             </div>
                             <div class="details -pad -subtitle">
                                 Visitors returning
@@ -185,7 +216,130 @@ require_once "common.php";
                                 </thead>
                                 <tbody>
                                     <?php
-                                        // TODO
+                                        $query = <<<SQL
+                                            SELECT COUNT(*) AS `view_count`
+                                            FROM `qr_scans`
+                                            WHERE `time` > :time
+                                            GROUP BY `name`
+                                            ORDER BY `view_count` DESC
+                                        SQL;
+
+                                        $stmt = $db->prepare($query);
+                                        $stmt->bindValue(":time", time() - 604800);
+                                        $maxScansInAWeek = $stmt->execute()->fetchArray(SQLITE3_NUM)[0];
+
+                                        $query = <<<SQL
+                                            SELECT `name`, `school` FROM `qr_scans` GROUP BY `name`
+                                        SQL;
+
+                                        $stmt = $db->prepare($query);
+                                        $result = $stmt->execute();
+
+                                        while ($visitor = $result->fetchArray(SQLITE3_ASSOC)) {
+                                            $query = <<<SQL
+                                                SELECT * FROM `qr_scans` WHERE `name` = :name ORDER BY `time` DESC
+                                            SQL;
+
+                                            $stmt = $db->prepare($query);
+                                            $stmt->bindValue(":name", $visitor["name"]);
+                                            $result2 = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+                                            $date = date("m/d/y", $result2["time"]);
+
+                                            $query = <<<SQL
+                                                SELECT COUNT(*) AS `view_count`
+                                                FROM `qr_scans`
+                                                LEFT JOIN `qr` ON `qr_scans`.`qr_id` = `qr`.`id`
+                                                WHERE `qr_scans`.`name` = :name
+                                                AND `qr`.`type` != "entrance"
+                                            SQL;
+
+                                            $stmt = $db->prepare($query);
+                                            $stmt->bindValue(":name", $visitor["name"]);
+                                            $viewCount = $stmt->execute()->fetchArray(SQLITE3_NUM)[0];
+
+                                            $query = <<<SQL
+                                                SELECT `qr_scans`.`qr_id`, COUNT(*) AS `view_count`
+                                                FROM `qr_scans`
+                                                LEFT JOIN `qr` ON `qr_scans`.`qr_id` = `qr`.`id`
+                                                WHERE `qr_scans`.`name` = :name
+                                                AND `qr`.`type` != "entrance"
+                                                GROUP BY `qr_scans`.`qr_id`
+                                                ORDER BY `view_count` DESC
+                                            SQL;
+
+                                            $stmt = $db->prepare($query);
+                                            $stmt->bindValue(":name", $visitor["name"]);
+                                            $favoriteQrId = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+
+                                            if ($favoriteQrId == false) {
+                                                $favoriteContentName = "N/A";
+                                                $favoriteContentType = "N/A";
+                                            } else {
+                                                $favoriteQrId = $favoriteQrId["qr_id"];
+
+                                                $query = <<<SQL
+                                                    SELECT * FROM `qr` WHERE `id` = :id
+                                                SQL;
+
+                                                $stmt = $db->prepare($query);
+                                                $stmt->bindValue(":id", $favoriteQrId);
+                                                $result2 = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+                                                $favoriteContentName = $result2["name"];
+                                                $favoriteContentType = $result2["type"];
+                                            }
+
+                                            $query = <<<SQL
+                                                SELECT COUNT(*) AS `scan_count`
+                                                FROM `qr_scans`
+                                                LEFT JOIN `qr` ON `qr_scans`.`qr_id` = `qr`.`id`
+                                                WHERE `qr_scans`.`name` = :name
+                                                AND `qr`.`type` = "entrance"
+                                            SQL;
+
+                                            $stmt = $db->prepare($query);
+                                            $stmt->bindValue(":name", $visitor["name"]);
+                                            $entranceScanCount = $stmt->execute()->fetchArray(SQLITE3_ASSOC)["scan_count"];
+                                            $returnVisitor = ($entranceScanCount > 1) ? "Yes" : "No";
+
+                                            $query = <<<SQL
+                                                SELECT COUNT(*) FROM `qr_scans` WHERE `name` = :name AND `time` > :time
+                                            SQL;
+
+                                            $stmt = $db->prepare($query);
+                                            $stmt->bindValue(":name", $visitor["name"]);
+                                            $stmt->bindValue(":time", time() - 604800);
+                                            $scansInAWeek = $stmt->execute()->fetchArray(SQLITE3_NUM)[0];
+                                            $engagement = ($maxScansInAWeek == 0) ? 0 : ($scansInAWeek / $maxScansInAWeek) * 100;
+
+                                            echo <<<HTML
+                                                <tr>
+                                                    <td>
+                                                        {$visitor["name"]}
+                                                    </td>
+                                                    <td>
+                                                        {$visitor["school"]}
+                                                    </td>
+                                                    <td>
+                                                        {$date}
+                                                    </td>
+                                                    <td>
+                                                        {$viewCount}
+                                                    </td>
+                                                    <td>
+                                                        {$favoriteContentType}
+                                                    </td>
+                                                    <td>
+                                                        {$favoriteContentName}
+                                                    </td>
+                                                    <td>
+                                                        {$returnVisitor}
+                                                    </td>
+                                                    <td>
+                                                        {$engagement}%
+                                                    </td>
+                                                </tr>
+                                            HTML;
+                                        }
                                     ?>
                                 </tbody>
                             </table>
