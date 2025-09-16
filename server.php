@@ -223,8 +223,8 @@ function upload() {
         alert("Title must be between 1 and 50 characters.");
     }
 
-    if (strlen($_POST["description"]) <= 0 || strlen($_POST["description"]) > 1000) {
-        alert("Description must be between 1 and 1000 characters.");
+    if (strlen($_POST["description"]) > 1000) {
+        alert("Description must be less than 1000 characters.");
     }
 
     if ($_FILES["media"]["error"] != 0) {
@@ -276,8 +276,8 @@ function edit() {
         alert("Title must be between 1 and 50 characters.");
     }
 
-    if (strlen($_POST["description"]) <= 0 || strlen($_POST["description"]) > 1000) {
-        alert("Description must be between 1 and 1000 characters.");
+    if (strlen($_POST["description"]) > 1000) {
+        alert("Description must be less than 1000 characters.");
     }
 
     $query = <<<SQL
