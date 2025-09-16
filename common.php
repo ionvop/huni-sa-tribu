@@ -368,3 +368,77 @@ function buildQuery(SQLite3 $db, string $query, array $conditons = [], array $bi
     $result = $stmt->execute();
     return $result;
 }
+
+function aggregateData(array $data, int $currentTime): array {
+    // Use provided current time or system time
+    $currentTime = $currentTime ?? time();
+    $today = new DateTimeImmutable("@$currentTime");
+
+    $result = [
+        "daily" => [
+            "4 days ago" => 0,
+            "3 days ago" => 0,
+            "2 days ago" => 0,
+            "yesterday" => 0,
+            "today" => 0,
+        ],
+        "weekly" => [
+            "4 weeks ago" => 0,
+            "3 weeks ago" => 0,
+            "2 weeks ago" => 0,
+            "last week" => 0,
+            "this week" => 0,
+        ],
+        "monthly" => [
+            "4 months ago" => 0,
+            "3 months ago" => 0,
+            "2 months ago" => 0,
+            "last month" => 0,
+            "this month" => 0,
+        ],
+    ];
+
+    foreach ($data as $entry) {
+        $value = $entry["value"];
+        $time = $entry["time"];
+        $date = new DateTimeImmutable("@$time");
+
+        // Daily grouping
+        $daysDiff = (int)$today->diff($date)->format('%r%a'); // signed day difference
+        if ($daysDiff === 0) {
+            $result["daily"]["today"] += $value;
+        } elseif ($daysDiff === -1) {
+            $result["daily"]["yesterday"] += $value;
+        } elseif ($daysDiff >= -4 && $daysDiff <= -2) {
+            $result["daily"][abs($daysDiff) . " days ago"] += $value;
+        }
+
+        // Weekly grouping
+        $weekToday = (int)$today->format("oW"); // ISO year+week
+        $weekDate = (int)$date->format("oW");
+        $weekDiff = $weekDate - $weekToday;
+
+        if ($weekDiff === 0) {
+            $result["weekly"]["this week"] += $value;
+        } elseif ($weekDiff === -1) {
+            $result["weekly"]["last week"] += $value;
+        } elseif ($weekDiff >= -4 && $weekDiff <= -2) {
+            $result["weekly"][abs($weekDiff) . " weeks ago"] += $value;
+        }
+
+        // Monthly grouping
+        $monthToday = (int)$today->format("Ym");
+        $monthDate = (int)$date->format("Ym");
+        $monthDiff = $monthDate - $monthToday;
+
+        if ($monthDiff === 0) {
+            $result["monthly"]["this month"] += $value;
+        } elseif ($monthDiff === -1) {
+            $result["monthly"]["last month"] += $value;
+        } elseif ($monthDiff >= -4 && $monthDiff <= -2) {
+            $result["monthly"][abs($monthDiff) . " months ago"] += $value;
+        }
+    }
+
+    return $result;
+}
