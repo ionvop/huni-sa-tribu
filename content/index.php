@@ -278,7 +278,15 @@ $typeMap = [
                         <div class="content stat">
                             <div class="box">
                                 <div class="value -pad -title -center">
-                                    0
+                                    <?php
+                                        $query = <<<SQL
+                                            SELECT COUNT(*) FROM `uploads`
+                                        SQL;
+
+                                        $stmt = $db->prepare($query);
+                                        $totalContent = $stmt->execute()->fetchArray(SQLITE3_NUM)[0];
+                                        echo $totalContent;
+                                    ?>
                                 </div>
                                 <div class="label -pad -subtitle -center">
                                     Total Content
