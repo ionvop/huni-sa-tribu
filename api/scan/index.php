@@ -29,13 +29,27 @@ try {
                 exit;
             }
 
+            $roleMap = [
+                "Student" => "student",
+                "Visitor" => "visitor"
+            ];
+
+            $role = $roleMap[$_POST["userData"]["role"]];
+
+            if ($role == "visitor") {
+                $_POST["userData"]["school"] = "N/A";
+            }
+
             $query = <<<SQL
-                INSERT INTO `qr_scans` (`qr_id`)
-                VALUES (:qr_id);
+                INSERT INTO `qr_scans` (`qr_id`, `name`, `role`, `school`)
+                VALUES (:qr_id, :name, :role, :school);
             SQL;
 
             $stmt = $db->prepare($query);
             $stmt->bindValue(":qr_id", $qr["id"]);
+            $stmt->bindValue(":name", $_POST["userData"]["name"]);
+            $stmt->bindValue(":role", $role);
+            $stmt->bindValue(":school", $_POST["userData"]["school"]);
             $stmt->execute();
 
             echo json_encode([
