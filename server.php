@@ -237,19 +237,9 @@ function upload() {
         alert("File could not be uploaded.");
     }
 
-    $type = "";
-
-    if (strpos(mime_content_type("uploads/{$filename}"), "image/") === 0) {
-        $type = "image";
-    } else if (strpos(mime_content_type("uploads/{$filename}"), "video/") === 0) {
-        $type = "video";
-    } else if (strpos(mime_content_type("uploads/{$filename}"), "audio/") === 0) {
-        $type = "audio";
-    }
-
     $query = <<<SQL
-        INSERT INTO `uploads` (`user_id`, `title`, `tribe`, `description`, `category`, `type`, `file`)
-        VALUES (:user_id, :title, :tribe, :description, :category, :type, :file)
+        INSERT INTO `content` (`user_id`, `title`, `tribe`, `description`, `category`, `file`)
+        VALUES (:user_id, :title, :tribe, :description, :category, :file)
     SQL;
 
     $stmt = $db->prepare($query);
@@ -258,7 +248,6 @@ function upload() {
     $stmt->bindValue(":tribe", $_POST["tribe"]);
     $stmt->bindValue(":description", $_POST["description"]);
     $stmt->bindValue(":category", $_POST["category"]);
-    $stmt->bindValue(":type", $type);
     $stmt->bindValue(":file", $filename);
     $stmt->execute();
     header("Location: content/");
@@ -281,7 +270,7 @@ function edit() {
     }
 
     $query = <<<SQL
-        SELECT * FROM `uploads` WHERE `id` = :id
+        SELECT * FROM `content` WHERE `id` = :id
     SQL;
 
     $stmt = $db->prepare($query);
@@ -301,7 +290,7 @@ function edit() {
         }
 
         $query = <<<SQL
-            UPDATE `uploads` SET `file` = :file WHERE `id` = :id
+            UPDATE `content` SET `file` = :file WHERE `id` = :id
         SQL;
 
         $stmt = $db->prepare($query);
@@ -310,18 +299,8 @@ function edit() {
         $stmt->execute();
     }
 
-    $type = "";
-
-    if (strpos(mime_content_type("uploads/{$filename}"), "image/") === 0) {
-        $type = "image";
-    } else if (strpos(mime_content_type("uploads/{$filename}"), "video/") === 0) {
-        $type = "video";
-    } else if (strpos(mime_content_type("uploads/{$filename}"), "audio/") === 0) {
-        $type = "audio";
-    }
-
     $query = <<<SQL
-        UPDATE `uploads` SET `title` = :title, `tribe` = :tribe, `description` = :description, `category` = :category, `type` = :type WHERE `id` = :id
+        UPDATE `content` SET `title` = :title, `tribe` = :tribe, `description` = :description, `category` = :category WHERE `id` = :id
     SQL;
 
     $stmt = $db->prepare($query);
@@ -329,7 +308,6 @@ function edit() {
     $stmt->bindValue(":tribe", $_POST["tribe"]);
     $stmt->bindValue(":description", $_POST["description"]);
     $stmt->bindValue(":category", $_POST["category"]);
-    $stmt->bindValue(":type", $type);
     $stmt->bindValue(":id", $_POST["id"]);
     $stmt->execute();
     header("Location: content/");
@@ -344,7 +322,7 @@ function delete() {
     }
 
     $query = <<<SQL
-        DELETE FROM `uploads` WHERE `id` = :id
+        DELETE FROM `content` WHERE `id` = :id
     SQL;
 
     $stmt = $db->prepare($query);
