@@ -5,7 +5,7 @@ require_once "common.php";
 $db = new SQLite3("database.db");
 
 $query = <<<SQL
-    SELECT * FROM `uploads` WHERE `id` = :id
+    SELECT * FROM `content` WHERE `id` = :id
 SQL;
 
 $stmt = $db->prepare($query);
@@ -150,7 +150,7 @@ if ($post == false) {
                             </div>
                         </div>
                         <div class="upload -pad -center">
-                            <input type="file" id="inputMedia" accept="image/*, video/*, audio/*" onchange="inputMedia_change(event)" name="media">
+                            <input type="file" id="inputMedia" accept="image/*, video/*, audio/*" name="media">
                         </div>
                     </div>
                     <div class="form">
@@ -167,14 +167,14 @@ if ($post == false) {
                                 Tribe
                             </div>
                             <div class="input -pad">
-                                <select name="tribe" class="-select" value="<?=htmlentities($post["tribe"])?>">
-                                    <option value="ata-manobo">
+                                <select name="tribe" class="-select">
+                                    <option value="ata-manobo" <?=$post["tribe"] == "ata-manobo" ? "selected" : ""?>>
                                         Ata-Manobo
                                     </option>
-                                    <option value="mandaya">
+                                    <option value="mandaya" <?=$post["tribe"] == "mandaya" ? "selected" : ""?>>
                                         Mandaya
                                     </option>
-                                    <option value="mansaka">
+                                    <option value="mansaka" <?=$post["tribe"] == "mansaka" ? "selected" : ""?>>
                                         Mansaka
                                     </option>
                                 </select>
@@ -193,17 +193,17 @@ if ($post == false) {
                                 Categories
                             </div>
                             <div class="input -pad">
-                                <select name="category" class="-select" value="<?=htmlentities($post["category"])?>">
-                                     <option value="instrument">
+                                <select name="category" class="-select">
+                                     <option value="instrument" <?=$post["category"] == "instrument" ? "selected" : ""?>>
                                         Instrument
                                     </option>
-                                    <option value="video">
+                                    <option value="video" <?=$post["category"] == "video" ? "selected" : ""?>>
                                         Video
                                     </option>
-                                    <option value="music">
+                                    <option value="music" <?=$post["category"] == "music" ? "selected" : ""?>>
                                         Music
                                     </option>
-                                    <option value="artifact">
+                                    <option value="artifact" <?=$post["category"] == "artifact" ? "selected" : ""?>>
                                         Artifact
                                     </option>
                                 </select>
@@ -212,7 +212,7 @@ if ($post == false) {
                         <div class="submit">
                             <div></div>
                             <div class="delete -pad">
-                                <button type="button" class="-button" onclick="btnDelete_click()">
+                                <button type="button" class="-button" id="btnDelete">
                                     Delete
                                 </button>
                             </div>
@@ -232,8 +232,9 @@ if ($post == false) {
             let panelMedia = document.getElementById("panelMedia");
             let inputMedia = document.getElementById("inputMedia");
             let formEdit = document.getElementById("formEdit");
+            let btnDelete = document.getElementById("btnDelete");
 
-            function inputMedia_change(event) {
+            inputMedia.onchange = (event) => {
                 let file = event.target.files[0];
                 let reader = new FileReader();
 
@@ -263,11 +264,8 @@ if ($post == false) {
                 reader.readAsDataURL(file);
             }
 
-            function btnDelete_click() {
-                if (confirm("Are you sure you want to delete this post?") == false) {
-                    return;
-                }
-
+            btnDelete.onclick = () => {
+                if (confirm("Are you sure you want to delete this post?") == false) return;
                 let input = document.createElement("input");
                 input.type = "hidden";
                 input.name = "method";
