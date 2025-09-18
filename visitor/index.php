@@ -201,15 +201,6 @@ $db = new SQLite3("database.db");
                                             Content Viewed
                                         </th>
                                         <th>
-                                            Type
-                                        </th>
-                                        <th>
-                                            Favorite Content
-                                        </th>
-                                        <th>
-                                            Return Visitor
-                                        </th>
-                                        <th>
                                             Engagement
                                         </th>
                                     </tr>
@@ -258,50 +249,6 @@ $db = new SQLite3("database.db");
                                             $viewCount = $stmt->execute()->fetchArray(SQLITE3_NUM)[0];
 
                                             $query = <<<SQL
-                                                SELECT `qr_scans`.`qr_id`, COUNT(*) AS `view_count`
-                                                FROM `qr_scans`
-                                                LEFT JOIN `qr` ON `qr_scans`.`qr_id` = `qr`.`id`
-                                                WHERE `qr_scans`.`name` = :name
-                                                AND `qr`.`type` != "entrance"
-                                                GROUP BY `qr_scans`.`qr_id`
-                                                ORDER BY `view_count` DESC
-                                            SQL;
-
-                                            $stmt = $db->prepare($query);
-                                            $stmt->bindValue(":name", $visitor["name"]);
-                                            $favoriteQrId = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
-
-                                            if ($favoriteQrId == false) {
-                                                $favoriteContentName = "N/A";
-                                                $favoriteContentType = "N/A";
-                                            } else {
-                                                $favoriteQrId = $favoriteQrId["qr_id"];
-
-                                                $query = <<<SQL
-                                                    SELECT * FROM `qr` WHERE `id` = :id
-                                                SQL;
-
-                                                $stmt = $db->prepare($query);
-                                                $stmt->bindValue(":id", $favoriteQrId);
-                                                $result2 = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
-                                                $favoriteContentName = $result2["name"];
-                                                $favoriteContentType = $result2["type"];
-                                            }
-
-                                            $query = <<<SQL
-                                                SELECT COUNT(*) AS `scan_count`
-                                                FROM `qr_scans`
-                                                LEFT JOIN `qr` ON `qr_scans`.`qr_id` = `qr`.`id`
-                                                WHERE `qr_scans`.`name` = :name
-                                                AND `qr`.`type` = "entrance"
-                                            SQL;
-
-                                            $stmt = $db->prepare($query);
-                                            $stmt->bindValue(":name", $visitor["name"]);
-                                            $entranceScanCount = $stmt->execute()->fetchArray(SQLITE3_ASSOC)["scan_count"];
-                                            $returnVisitor = ($entranceScanCount > 1) ? "Yes" : "No";
-
-                                            $query = <<<SQL
                                                 SELECT COUNT(*) FROM `qr_scans` WHERE `name` = :name AND `time` > :time
                                             SQL;
 
@@ -324,15 +271,6 @@ $db = new SQLite3("database.db");
                                                     </td>
                                                     <td>
                                                         {$viewCount}
-                                                    </td>
-                                                    <td>
-                                                        {$favoriteContentType}
-                                                    </td>
-                                                    <td>
-                                                        {$favoriteContentName}
-                                                    </td>
-                                                    <td>
-                                                        {$returnVisitor}
                                                     </td>
                                                     <td>
                                                         {$engagement}%
