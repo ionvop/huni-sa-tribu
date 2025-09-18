@@ -6,7 +6,7 @@ $db = new SQLite3("database.db");
 $selected = "all";
 
 $query = <<<SQL
-    SELECT * FROM `uploads`
+    SELECT * FROM `content`
 SQL;
 
 $conditions = [];
@@ -27,7 +27,7 @@ if (isset($_GET["category"])) {
 }
 
 if (isset($_GET["q"])) {
-    $conditions[] = "(`title` LIKE :q OR `description` LIKE :q)";
+    $conditions[] = "(`title` LIKE :q OR `description` LIKE :q OR `tribe` LIKE :q OR `category` LIKE :q)";
     $binds[":q"] = "%{$_GET["q"]}%";
 }
 
@@ -152,8 +152,6 @@ $typeMap = [
 
                     & > .stats {
                         & > .box {
-                            display: grid;
-                            grid-template-columns: repeat(3, 1fr);
                             background-color: #fff;
                             border-radius: 1rem;
                             border: 1px solid #555;
@@ -221,12 +219,6 @@ $typeMap = [
                                         Type
                                     </th>
                                     <th class="-pad">
-                                        Engagement
-                                    </th>
-                                    <th class="-pad">
-                                        App Score
-                                    </th>
-                                    <th class="-pad">
                                         Actions
                                     </th>
                                 </tr>
@@ -235,7 +227,8 @@ $typeMap = [
                                 <?php
                                     while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
                                         $row["title"] = htmlentities($row["title"]);
-                                        $date = date("m/d/Y", $row["time"]);
+                                        $date = date("M d, Y g:iA", $row["time"]);
+                                        $type = getFileType($row["file"]);
 
                                         echo <<<HTML
                                             <tr>
@@ -252,13 +245,7 @@ $typeMap = [
                                                     {$categoryMap[$row["category"]]}
                                                 </td>
                                                 <td>
-                                                    {$typeMap[$row["type"]]}
-                                                </td>
-                                                <td>
-                                                    0%
-                                                </td>
-                                                <td>
-                                                    0
+                                                    {$typeMap[$type]}
                                                 </td>
                                                 <td>
                                                     <a href="content/edit/?id={$row['id']}">
@@ -278,38 +265,10 @@ $typeMap = [
                         <div class="content stat">
                             <div class="box">
                                 <div class="value -pad -title -center">
-                                    <?php
-                                        $query = <<<SQL
-                                            SELECT COUNT(*) FROM `uploads`
-                                        SQL;
-
-                                        $stmt = $db->prepare($query);
-                                        $totalContent = $stmt->execute()->fetchArray(SQLITE3_NUM)[0];
-                                        echo $totalContent;
-                                    ?>
+                                    <?=getTotalContent()?>
                                 </div>
                                 <div class="label -pad -subtitle -center">
                                     Total Content
-                                </div>
-                            </div>
-                        </div>
-                        <div class="score stat">
-                            <div class="box">
-                                <div class="value -pad -title -center">
-                                    0
-                                </div>
-                                <div class="label -pad -subtitle -center">
-                                    Total App Score
-                                </div>
-                            </div>
-                        </div>
-                        <div class="engagement stat">
-                            <div class="box">
-                                <div class="value -pad -title -center">
-                                    0%
-                                </div>
-                                <div class="label -pad -subtitle -center">
-                                    Avg. Engagement
                                 </div>
                             </div>
                         </div>
