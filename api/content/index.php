@@ -17,7 +17,7 @@ try {
         case "GET":
             if (isset($_GET["id"])) {
                 $query = <<<SQL
-                    SELECT * FROM `uploads` WHERE `id` = :id
+                    SELECT * FROM `content` WHERE `id` = :id
                 SQL;
 
                 $stmt = $db->prepare($query);
@@ -27,7 +27,7 @@ try {
                 exit;
             } else if (isset($_GET["tribe"])) {
                 $query = <<<SQL
-                    SELECT * FROM `uploads` WHERE `tribe` = :tribe
+                    SELECT * FROM `content` WHERE `tribe` = :tribe
                 SQL;
 
                 if (isset($_GET["category"])) {
@@ -53,7 +53,7 @@ try {
                 exit;
             } else if (isset($_GET["category"])) {
                 $query = <<<SQL
-                    SELECT * FROM `uploads` WHERE `category` = :category
+                    SELECT * FROM `content` WHERE `category` = :category
                 SQL;
 
                 $stmt = $db->prepare($query);
@@ -72,7 +72,7 @@ try {
                 $content = [];
 
                 $query = <<<SQL
-                    SELECT * FROM `uploads`
+                    SELECT * FROM `content`
                 SQL;
 
                 $stmt = $db->prepare($query);
