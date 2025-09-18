@@ -442,3 +442,26 @@ function aggregateData(array $data, int $currentTime): array {
 
     return $result;
 }
+
+function getTotalContent() {
+    $db = new SQLite3("database.db");
+    
+    $query = <<<SQL
+        SELECT COUNT(*) FROM `content`
+    SQL;
+
+    $stmt = $db->prepare($query);
+    return $stmt->execute()->fetchArray(SQLITE3_NUM)[0];
+}
+
+function getFileType($file) {
+    if (strpos(mime_content_type("uploads/{$file}"), "image/") === 0) {
+        return "image";
+    } else if (strpos(mime_content_type("uploads/{$file}"), "video/") === 0) {
+        return "video";
+    } else if (strpos(mime_content_type("uploads/{$file}"), "audio/") === 0) {
+        return "audio";
+    }
+
+    return false;
+}
