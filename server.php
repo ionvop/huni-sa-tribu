@@ -2,16 +2,7 @@
 
 require_once "common.php";
 
-if (isset($_GET["method"])) {
-    switch ($_GET["method"]) {
-        case "verify":
-            verify();
-            break;
-        default:
-            defaultMethod();
-            break;
-    }
-} else if (isset($_POST["method"])) {
+if (isset($_POST["method"])) {
     switch ($_POST["method"]) {
         case "register":
             register();
@@ -28,16 +19,19 @@ if (isset($_GET["method"])) {
         case "edit":
             edit();
             break;
-        case "delete":
-            delete();
+        case "archive":
+            archive();
             break;
-        case "new_qr":
-            newQr();
+        case "restore":
+            restore();
             break;
-        case "edit_qr":
+        case "generateQr":
+            generateQr();
+            break;
+        case "editQr":
             editQr();
             break;
-        case "delete_qr":
+        case "deleteQr":
             deleteQr();
             break;
         default:
@@ -48,84 +42,19 @@ if (isset($_GET["method"])) {
     defaultMethod();
 }
 
-function verify() {
-    $db = new SQLite3("database.db");
-
-    $query = <<<SQL
-        DELETE FROM `email_verifications` WHERE `time` < :time
-    SQL;
-
-    $stmt = $db->prepare($query);
-    $stmt->bindValue(":time", time() - 600);
-    $stmt->execute();
-
-    $query = <<<SQL
-        SELECT * FROM `email_verifications` WHERE `email` = :email AND `code` = :code
-    SQL;
-
-    $stmt = $db->prepare($query);
-    $stmt->bindValue(":email", $_GET["email"]);
-    $stmt->bindValue(":code", $_GET["code"]);
-    $verification = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
-
-    if ($verification == false) {
-        alert("Invalid verification link. It may have expired.");
-    }
-
-    $query = <<<SQL
-        UPDATE `email_verifications` SET `is_verified` = 'yes', `time` = :time WHERE `email` = :email AND `code` = :code
-    SQL;
-
-    $stmt = $db->prepare($query);
-    $stmt->bindValue(":email", $_GET["email"]);
-    $stmt->bindValue(":code", $_GET["code"]);
-    $stmt->bindValue(":time", time());
-    $stmt->execute();
-
-    $query = <<<SQL
-        DELETE FROM `email_verifications` WHERE `email` = :email AND `is_verified` = 'no'
-    SQL;
-
-    $stmt = $db->prepare($query);
-    $stmt->bindValue(":email", $_GET["email"]);
-    $stmt->execute();
-    alert("Email address verified. Please register this email within 10 minutes.");
-    header("Location: ./");
-}
-
 function register() {
     $db = new SQLite3("database.db");
 
-    if (strlen($_POST["fullname"]) == 0 || strlen($_POST["fullname"]) > 50) {
-        alert("Fullname must be between 1 and 50 characters.");
-    }
-
-    if (strlen($_POST["username"]) < 4 || strlen($_POST["username"]) > 20) {
-        alert("Username must be between 4 and 20 characters.");
+    if ($_POST["firstname"] == "" || $_POST["lastname"] == "" || $_POST["username"] == "" || $_POST["email"] == "" || $_POST["password"] == "") {
+        alert("Please fill in all fields.");
     }
 
     if (filter_var($_POST["email"], FILTER_VALIDATE_EMAIL) === false) {
-        alert("Invalid email address.");
-    }
-
-    if (strlen($_POST["password"]) < 6 || strlen($_POST["password"]) > 50) {
-        alert("Password must be between 6 and 50 characters.");
+        alert("Please enter a valid email address.");
     }
 
     if ($_POST["password"] != $_POST["repassword"]) {
         alert("Passwords do not match.");
-    }
-
-    $query = <<<SQL
-        SELECT * FROM `email_verifications` WHERE `email` = :email AND `is_verified` = 'yes'
-    SQL;
-
-    $stmt = $db->prepare($query);
-    $stmt->bindValue(":email", $_POST["email"]);
-    $verification = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
-
-    if ($verification == false) {
-        alert("Email address not yet verified or it may have expired.");
     }
 
     $query = <<<SQL
@@ -135,35 +64,38 @@ function register() {
     $stmt = $db->prepare($query);
     $stmt->bindValue(":username", $_POST["username"]);
     $stmt->bindValue(":email", $_POST["email"]);
-    $user = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+    $user = $stmt->execute()->fetchArray();
 
     if ($user != false) {
-        if ($user["username"] == $_POST["username"]) {
-            alert("Username is already taken.");
-        }
-
-        if ($user["email"] == $_POST["email"]) {
-            alert("Email is already taken.");
-        }
+        alert("Username or email already in use.");
     }
 
     $hash = password_hash($_POST["password"], PASSWORD_DEFAULT);
-    
+    $session = uniqid("session-");
+
     $query = <<<SQL
-        INSERT INTO `users` (`fullname`, `email`, `username`, `hash`) VALUES (:fullname, :email, :username, :hash)
+        INSERT INTO `users` (`firstname`, `lastname`, `username`, `email`, `hash`, `session`)
+        VALUES (:firstname, :lastname, :username, :email, :hash, :session)
     SQL;
 
     $stmt = $db->prepare($query);
-    $stmt->bindValue(":fullname", $_POST["fullname"]);
-    $stmt->bindValue(":email", $_POST["email"]);
+    $stmt->bindValue(":firstname", $_POST["firstname"]);
+    $stmt->bindValue(":lastname", $_POST["lastname"]);
     $stmt->bindValue(":username", $_POST["username"]);
+    $stmt->bindValue(":email", $_POST["email"]);
     $stmt->bindValue(":hash", $hash);
+    $stmt->bindValue(":session", $session);
     $stmt->execute();
-    alert("Account successfully created. Please login.", "login/");
+    setcookie("session", $session, time() + 86400);
+    header("Location: ./");
 }
 
 function login() {
     $db = new SQLite3("database.db");
+
+    if ($_POST["username"] == "" || $_POST["password"] == "") {
+        alert("Please fill in all fields.");
+    }
 
     $query = <<<SQL
         SELECT * FROM `users` WHERE `username` = :username
@@ -171,7 +103,7 @@ function login() {
 
     $stmt = $db->prepare($query);
     $stmt->bindValue(":username", $_POST["username"]);
-    $user = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+    $user = $stmt->execute()->fetchArray();
 
     if ($user == false) {
         alert("Invalid credentials.");
@@ -188,16 +120,20 @@ function login() {
     SQL;
 
     $stmt = $db->prepare($query);
-    $stmt->bindValue(":session", $session);
     $stmt->bindValue(":id", $user["id"]);
+    $stmt->bindValue(":session", $session);
     $stmt->execute();
-    setcookie("session", $session, time() + 86400 * 30);
+    setcookie("session", $session, time() + 86400);
     header("Location: ./");
 }
 
 function logout() {
     $db = new SQLite3("database.db");
     $user = getUser();
+
+    if ($user == false) {
+        alert("You are not logged in.");
+    }
 
     $query = <<<SQL
         UPDATE `users` SET `session` = NULL WHERE `id` = :id
@@ -206,9 +142,8 @@ function logout() {
     $stmt = $db->prepare($query);
     $stmt->bindValue(":id", $user["id"]);
     $stmt->execute();
-    setcookie("session", "", time() - 3600);
+    setcookie("session", "", time() - 86400);
     header("Location: ./");
-    exit;
 }
 
 function upload() {
@@ -216,38 +151,35 @@ function upload() {
     $user = getUser();
 
     if ($user == false) {
-        alert("You must be logged in to upload.");
+        alert("You are not logged in.");
     }
 
-    if (strlen($_POST["title"]) <= 0 || strlen($_POST["title"]) > 50) {
-        alert("Title must be between 1 and 50 characters.");
+    if ($_POST["title"] == "" || $_POST["category"] == "" || $_POST["tribe"] == "") {
+        alert("Please fill in all fields.");
     }
 
-    if (strlen($_POST["description"]) > 1000) {
-        alert("Description must be less than 1000 characters.");
+    if ($_FILES["file"]["error"] != 0) {
+        alert("There was an error uploading the file.");
     }
 
-    if ($_FILES["media"]["error"] != 0) {
-        alert("File could not be uploaded.");
-    }
+    $filename = uniqid("file-");
+    $filename .= "." . pathinfo($_FILES["file"]["name"], PATHINFO_EXTENSION);
 
-    $filename = uniqid("upload-") . "." . pathinfo($_FILES["media"]["name"], PATHINFO_EXTENSION);
-
-    if (move_uploaded_file($_FILES["media"]["tmp_name"], "uploads/{$filename}") == false) {
-        alert("File could not be uploaded.");
+    if (move_uploaded_file($_FILES["file"]["tmp_name"], "uploads/{$filename}") == false) {
+        alert("There was an error uploading the file.");
     }
 
     $query = <<<SQL
-        INSERT INTO `content` (`user_id`, `title`, `tribe`, `description`, `category`, `file`)
-        VALUES (:user_id, :title, :tribe, :description, :category, :file)
+        INSERT INTO `content`(`user_id`, `title`, `category`, `tribe`, `description`, `file`)
+        VALUES (:user_id, :title, :category, :tribe, :description, :file)
     SQL;
 
     $stmt = $db->prepare($query);
     $stmt->bindValue(":user_id", $user["id"]);
     $stmt->bindValue(":title", $_POST["title"]);
+    $stmt->bindValue(":category", $_POST["category"]);
     $stmt->bindValue(":tribe", $_POST["tribe"]);
     $stmt->bindValue(":description", $_POST["description"]);
-    $stmt->bindValue(":category", $_POST["category"]);
     $stmt->bindValue(":file", $filename);
     $stmt->execute();
     header("Location: content/");
@@ -258,15 +190,7 @@ function edit() {
     $user = getUser();
 
     if ($user == false) {
-        alert("You must be logged in to edit.");
-    }
-
-    if (strlen($_POST["title"]) <= 0 || strlen($_POST["title"]) > 50) {
-        alert("Title must be between 1 and 50 characters.");
-    }
-
-    if (strlen($_POST["description"]) > 1000) {
-        alert("Description must be less than 1000 characters.");
+        alert("You are not logged in.");
     }
 
     $query = <<<SQL
@@ -275,54 +199,82 @@ function edit() {
 
     $stmt = $db->prepare($query);
     $stmt->bindValue(":id", $_POST["id"]);
-    $post = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
-    $filename = $post["file"];
+    $content = $stmt->execute()->fetchArray();
 
-    if ($_FILES["media"]["error"] != 4) {
-        if ($_FILES["media"]["error"] != 0) {
-            alert("File could not be uploaded.");
+    if ($content == false) {
+        alert("This content does not exist.");
+    }
+
+    if ($_POST["title"] == "" || $_POST["category"] == "" || $_POST["tribe"] == "") {
+        alert("Please fill in all fields.");
+    }
+
+    $filename = $content["file"];
+
+    if ($_FILES["file"]["error"] != 4) {
+        if ($_FILES["file"]["error"] != 0) {
+            alert("There was an error uploading the file.");
         }
 
-        $filename = uniqid("upload-") . "." . pathinfo($_FILES["media"]["name"], PATHINFO_EXTENSION);
+        $filename = uniqid("file-");
+        $filename .= "." . pathinfo($_FILES["file"]["name"], PATHINFO_EXTENSION);
 
-        if (move_uploaded_file($_FILES["media"]["tmp_name"], "uploads/{$filename}") == false) {
-            alert("File could not be uploaded.");
+        if (move_uploaded_file($_FILES["file"]["tmp_name"], "uploads/{$filename}") == false) {
+            alert("There was an error uploading the file.");
         }
-
-        $query = <<<SQL
-            UPDATE `content` SET `file` = :file WHERE `id` = :id
-        SQL;
-
-        $stmt = $db->prepare($query);
-        $stmt->bindValue(":file", $filename);
-        $stmt->bindValue(":id", $_POST["id"]);
-        $stmt->execute();
     }
 
     $query = <<<SQL
-        UPDATE `content` SET `title` = :title, `tribe` = :tribe, `description` = :description, `category` = :category WHERE `id` = :id
+        UPDATE `content`
+        SET `title` = :title,
+        `category` = :category,
+        `tribe` = :tribe,
+        `description` = :description,
+        `file` = :file
+        WHERE `id` = :id
     SQL;
 
     $stmt = $db->prepare($query);
     $stmt->bindValue(":title", $_POST["title"]);
+    $stmt->bindValue(":category", $_POST["category"]);
     $stmt->bindValue(":tribe", $_POST["tribe"]);
     $stmt->bindValue(":description", $_POST["description"]);
-    $stmt->bindValue(":category", $_POST["category"]);
     $stmt->bindValue(":id", $_POST["id"]);
+    $stmt->bindValue(":file", $filename);
     $stmt->execute();
     header("Location: content/");
 }
 
-function delete() {
+function archive() {
     $db = new SQLite3("database.db");
     $user = getUser();
 
     if ($user == false) {
-        alert("You must be logged in to delete.");
+        alert("You are not logged in.");
     }
 
     $query = <<<SQL
-        DELETE FROM `content` WHERE `id` = :id
+        UPDATE `content` SET `is_archived` = 1 WHERE `id` = :id
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":id", $_POST["id"]);
+    $stmt->execute();
+    header("Location: content/archive/");
+}
+
+function restore() {
+    $db = new SQLite3("database.db");
+    $user = getUser();
+
+    if ($user == false) {
+        alert("You are not logged in.");
+    }
+
+    $query = <<<SQL
+        UPDATE `content`
+        SET `is_archived` = 0
+        WHERE `id` = :id
     SQL;
 
     $stmt = $db->prepare($query);
@@ -331,35 +283,53 @@ function delete() {
     header("Location: content/");
 }
 
-function newQr() {
+function generateQr() {
     $db = new SQLite3("database.db");
-    $code = uniqid("qr-");
+    $user = getUser();
+
+    if ($user == false) {
+        alert("You are not logged in.");
+    }
 
     $query = <<<SQL
-        INSERT INTO `qr` (`code`) VALUES (:code)
+        SELECT * FROM `qr` WHERE `content_id` = :id
     SQL;
 
     $stmt = $db->prepare($query);
+    $stmt->bindValue(":id", $_POST["id"]);
+    $qr = $stmt->execute()->fetchArray();
+
+    if ($qr != false) {
+        alert("This content already has a QR code.");
+    }
+
+    $code = uniqid("qr-");
+
+    $query = <<<SQL
+        INSERT INTO `qr` (`content_id`, `code`)
+        VALUES (:id, :code)
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":id", $_POST["id"]);
     $stmt->bindValue(":code", $code);
     $stmt->execute();
-    $id = $db->lastInsertRowID();
-    header("Location: visitor/qr/edit/?id={$id}");
+    $qrId = $db->lastInsertRowID();
+    header("Location: visitors/qr/view/?id={$qrId}");
 }
 
 function editQr() {
     $db = new SQLite3("database.db");
 
     $query = <<<SQL
-        UPDATE `qr` SET `name` = :name, `type` = :type, `status` = :status WHERE `id` = :id
+        UPDATE `qr` SET `status` = :status WHERE `id` = :id
     SQL;
 
     $stmt = $db->prepare($query);
-    $stmt->bindValue(":name", $_POST["name"]);
-    $stmt->bindValue(":type", $_POST["type"]);
     $stmt->bindValue(":status", $_POST["status"]);
     $stmt->bindValue(":id", $_POST["id"]);
     $stmt->execute();
-    header("Location: visitor/qr/");
+    header("Location: visitors/qr/");
 }
 
 function deleteQr() {
@@ -372,7 +342,16 @@ function deleteQr() {
     $stmt = $db->prepare($query);
     $stmt->bindValue(":id", $_POST["id"]);
     $stmt->execute();
-    header("Location: visitor/qr/");
+
+    $query = <<<SQL
+        DELETE FROM `scans` WHERE `qr_id` = :id
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":id", $_POST["id"]);
+    $stmt->execute();
+
+    header("Location: visitors/qr/");
 }
 
 function defaultMethod() {
