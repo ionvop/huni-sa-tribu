@@ -1,19 +1,11 @@
 <?php
 
-if (php_sapi_name() != 'cli') {
-    echo "This script can only be run from the command line.";
+if (php_sapi_name() != "cli") {
+    echo "Please run this script from the command line.";
     exit;
 }
 
 $db = new SQLite3("database.db");
-
-$query = <<<SQL
-    CREATE TABLE "users" (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `fullname` TEXT, `email` TEXT UNIQUE, `username` TEXT UNIQUE, `hash` TEXT, `session` TEXT, `time` INTEGER DEFAULT (unixepoch()));
-    CREATE TABLE "email_verifications" (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `email` TEXT, `code` TEXT, `is_verified` TEXT DEFAULT 'no', `time` INTEGER DEFAULT (unixepoch()));
-    CREATE TABLE "content" (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `user_id` INTEGER REFERENCES `users`(`id`), `title` TEXT, `tribe` TEXT, `description` TEXT, `category` TEXT, `type` TEXT, `file` TEXT, `is_archive` TEXT DEFAULT 'no', `time` INTEGER DEFAULT (unixepoch()));
-    CREATE TABLE "qr" (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `code` TEXT UNIQUE, `name` TEXT DEFAULT '', `type` TEXT DEFAULT 'Entrance', `status` TEXT DEFAULT 'Active', `time` INTEGER DEFAULT (unixepoch()));
-    CREATE TABLE `qr_scans` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `qr_id` INTEGER REFERENCES `qr`(`id`), `time` INTEGER DEFAULT (unixepoch()));
-SQL;
-
+$query = file_get_contents("init.sql");
 $db->exec($query);
-echo "Database initialized.\n";
+echo "Database initialized.";
