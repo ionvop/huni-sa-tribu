@@ -2,18 +2,14 @@
 
 chdir("../../");
 require_once "common.php";
+header("Content-type: application/json");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
+$db = new SQLite3("database.db");
 
 try {
-    $db = new SQLite3("database.db");
-    $_POST = json_decode(file_get_contents("php://input"), true);
-
     switch ($_SERVER["REQUEST_METHOD"]) {
-        case "OPTIONS":
-            http_response_code(204);
-            exit;
         case "GET":
             if (isset($_GET["id"])) {
                 $query = <<<SQL
@@ -23,77 +19,67 @@ try {
                 $stmt = $db->prepare($query);
                 $stmt->bindValue(":id", $_GET["id"]);
                 $content = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
-                echo json_encode($content);
-                exit;
-            } else if (isset($_GET["tribe"])) {
-                $query = <<<SQL
-                    SELECT * FROM `content` WHERE `tribe` = :tribe
-                SQL;
 
-                if (isset($_GET["category"])) {
-                    $query .= " AND `category` = :category";
-                }
+                echo json_encode([
+                    "data" => $content
+                ]);
 
-                $stmt = $db->prepare($query);
-                $stmt->bindValue(":tribe", $_GET["tribe"]);
-
-                if (isset($_GET["category"])) {
-                    $stmt->bindValue(":category", $_GET["category"]);
-                }
-
-                $content = [];
-                $result = $stmt->execute();
-
-                while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                    $row["file"] = "uploads/{$row['file']}";
-                    $content[] = $row;
-                }
-
-                echo json_encode($content);
-                exit;
-            } else if (isset($_GET["category"])) {
-                $query = <<<SQL
-                    SELECT * FROM `content` WHERE `category` = :category
-                SQL;
-
-                $stmt = $db->prepare($query);
-                $stmt->bindValue(":category", $_GET["category"]);
-                $content = [];
-                $result = $stmt->execute();
-
-                while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                    $row["file"] = "uploads/{$row['file']}";
-                    $content[] = $row;
-                }
-
-                echo json_encode($content);
-                exit;
-            } else {
-                $content = [];
-
-                $query = <<<SQL
-                    SELECT * FROM `content`
-                SQL;
-
-                $stmt = $db->prepare($query);
-                $result = $stmt->execute();
-
-                while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                    $row["file"] = "uploads/{$row['file']}";
-                    $content[] = $row;
-                }
-
-                echo json_encode($content);
                 exit;
             }
 
+            $query = <<<SQL
+                SELECT * FROM `content`
+            SQL;
+
+            $conditions = ["`is_archived` = 0"];
+            $bindings = [];
+
+            if (isset($_GET["category"])) {
+                $conditions[] = "`category` = :category";
+                $bindings["category"] = $_GET["category"];
+            }
+
+            if (isset($_GET["tribe"])) {
+                $conditions[] = "`tribe` = :tribe";
+                $bindings["tribe"] = $_GET["tribe"];
+            }
+
+            if (count($conditions) > 0) {
+                $query .= " WHERE " . implode(" AND ", $conditions);
+            }
+
+            $stmt = $db->prepare($query);
+
+            foreach ($bindings as $key => $value) {
+                $stmt->bindValue(":" . $key, $value);
+            }
+
+            $result = $stmt->execute();
+            $output = [];
+
+            while ($content = $result->fetchArray(SQLITE3_ASSOC)) {
+                if (isset($_GET["type"])) {
+                    if (getFileType($content["file"]) != $_GET["type"]) {
+                        continue;
+                    }
+                }
+
+                $output[] = $content;
+            }
+
+            echo json_encode([
+                "data" => $output
+            ]);
+
             exit;
-        default:
-            defaultMethod();
-            break;
+        case "OPTIONS":
+            http_response_code(204);
+            exit;
     }
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(["error" => $e->getMessage()]);
-    exit;
+
+    echo json_encode([
+        "error" => $e->getMessage()
+    ]);
 }
