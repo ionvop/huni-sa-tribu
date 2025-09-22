@@ -8,180 +8,194 @@ require_once "common.php";
 <html>
     <head>
         <title>
-            Content Management
+            New Content | Huni Sa Tribu
         </title>
         <base href="../../">
         <link rel="stylesheet" href="style.css">
         <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
-            body > .main {
-                display: grid;
-                grid-template-columns: max-content 1fr;
-                height: 100%;
-                overflow: hidden;
-
-                & > .content {
-                    overflow: hidden;
-                
-                    & > .box {
-                        display: grid;
-                        grid-template-columns: repeat(2, 1fr);
-                        height: 100%;
-                        border: 3px solid #555;
-                        border-radius: 1rem;
-
-                        & > .media {
-                            display: grid;
-                            grid-template-rows: minmax(0, 1fr) max-content;
-                            overflow: hidden;
-
-                            & > .preview {
-                                overflow: hidden;
-
-                                & > .box {
-                                    box-sizing: border-box;
-                                    height: 100%;
-                                    border: 1px solid #555;
-                                    border-radius: 1rem;
-                                    overflow: hidden;
-
-                                    & > img {
-                                        box-sizing: border-box;
-                                        max-width: 100%;
-                                        max-height: 100%;
-                                    }
-
-                                    & > video {
-                                        max-width: 100%;
-                                        max-height: 100%;
-                                    }
-                                }
-                            }
-                        }
-
-                        & > .form {
-                            overflow: auto;
-
-                            & > .field {
-                                & > .input {
-                                    padding-top: 0rem;
-                                }
-                            }
-
-                            & > .submit {
-                                display: grid;
-                                grid-template-columns: 1fr max-content;
-
-                                & > .button {
-                                    & > button {
-                                        background-color: var(--theme-green-dark);
-                                        color: #fff;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            button {
+                padding-left: 5rem;
+                padding-right: 5rem;
+                color: #fff;
+                border-radius: 2rem;
             }
 
-            .-input {
-                border: 1px solid #555;
+            input {
+                background-color: #fff5;
+                color: #fff;
+                backdrop-filter: blur(5px);
+                border: 1px solid #fff;
+                border-radius: 1rem;
             }
 
-            .-select {
-                border: 1px solid #555;
+            select {
+                background-color: #fff5;
+                color: #fff;
+                backdrop-filter: blur(5px);
+                border: 1px solid #fff;
+                border-radius: 1rem;
             }
 
-            .-textarea {
-                border: 1px solid #555;
+            option {
+                background-color: #fff;
+                color: #000;
+            }
+
+            textarea {
+                background-color: #fff5;
+                color: #fff;
+                backdrop-filter: blur(5px);
+                border: 1px solid #fff;
+                border-radius: 1rem;
             }
         </style>
     </head>
     <body>
-        <div class="main">
-            <?=renderNavigation("content", "new")?>
-            <div class="content -pad">
-                <form action="server.php" class="-form box" method="post" enctype="multipart/form-data">
-                    <div class="media">
-                        <div class="preview -pad">
-                            <div class="box -pad -center__flex" id="panelMedia">
-
-                            </div>
+        <div style="
+            padding: 5rem;
+            height: 100%;
+            box-sizing: border-box;
+            overflow: auto;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('assets/home.jpg');
+            background-size: cover;
+            background-position: bottom;">
+            <div style="
+                display: grid;
+                grid-template-columns: max-content 1fr;">
+                <a style="
+                    display: block;
+                    padding: 1rem;"
+                    href="content/">
+                    BACK TO HOME
+                </a>
+                <div></div>
+            </div>
+            <div style="
+                padding: 1rem;
+                padding-top: 5rem;
+                font-size: 2rem;
+                font-weight: bold;">
+                Upload a Content
+            </div>
+            <div style="
+                padding: 1rem;">
+                <form style="
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    background-color: #0005;"
+                    action="server.php"
+                    method="post"
+                    enctype="multipart/form-data">
+                    <div style="
+                        padding: 1rem;">
+                        <div style="
+                            padding: 1rem;
+                            font-weight: bold;">
+                            CATEGORY
                         </div>
-                        <div class="upload -pad -center">
-                            <input type="file" id="inputMedia" accept="image/*, video/*, audio/*" onchange="inputMedia_change(event)" name="media" required>
+                        <div style="
+                            padding: 1rem;
+                            padding-top: 0rem;">
+                            <select name="category"
+                                required>
+                                <option value="">
+                                    Select a category
+                                </option>
+                                <option value="music">
+                                    Music
+                                </option>
+                                <option value="video">
+                                    Video
+                                </option>
+                                <option value="artifact">
+                                    Artifact
+                                </option>
+                                <option value="instrument">
+                                    instrument
+                                </option>
+                            </select>
+                        </div>
+                        <div style="
+                            padding: 1rem;
+                            font-weight: bold;">
+                            TITLE
+                        </div>
+                        <div style="
+                            padding: 1rem;
+                            padding-top: 0rem;">
+                            <input name="title"
+                                required>
+                        </div>
+                        <div style="
+                            padding: 1rem;
+                            font-weight: bold;">
+                            TRIBE
+                        </div>
+                        <div style="
+                            padding: 1rem;
+                            padding-top: 0rem;">
+                            <select name="tribe"
+                                required>
+                                <option value="">
+                                    Select a tribe
+                                </option>
+                                <option value="kagan">
+                                    Kagan
+                                </option>
+                                <option value="mandaya">
+                                    Mandaya
+                                </option>
+                                <option value="mansaka">
+                                    Mansaka
+                                </option>
+                            </select>
+                        </div>
+                        <div style="
+                            padding: 1rem;
+                            font-weight: bold;">
+                            DESCRIPTION
+                        </div>
+                        <div style="
+                            padding: 1rem;
+                            padding-top: 0rem;">
+                            <textarea name="description"></textarea>
                         </div>
                     </div>
-                    <div class="form">
-                        <div class="title field">
-                            <div class="label -pad">
-                                Title
-                            </div>
-                            <div class="input -pad">
-                                <input type="text" class="-input" name="title" placeholder="Add title" required>
-                            </div>
+                    <div style="
+                        display: grid;
+                        grid-template-rows: repeat(2, max-content) 1fr max-content;
+                        padding: 1rem;">
+                        <div style="
+                            padding: 1rem;
+                            text-align: center;"
+                            id="panelPreview">
                         </div>
-                        <div class="tribe field">
-                            <div class="label -pad">
-                                Tribe
-                            </div>
-                            <div class="input -pad">
-                                <select name="tribe" class="-select" required>
-                                    <option value="">
-                                        Select Tribe
-                                    </option>
-                                    <option value="ata-manobo">
-                                        Ata-Manobo
-                                    </option>
-                                    <option value="mandaya">
-                                        Mandaya
-                                    </option>
-                                    <option value="mansaka">
-                                        Mansaka
-                                    </option>
-                                </select>
-                            </div>
+                        <div style="
+                            padding: 1rem;
+                            text-align: center;">
+                            <input style="
+                                padding: 0rem;
+                                width: initial;
+                                background-color: transparent;
+                                border: none;"
+                                type="file"
+                                name="file"
+                                accept="image/*, video/*, audio/*"
+                                id="inputFile"
+                                required>
                         </div>
-                        <div class="description field">
-                            <div class="label -pad">
-                                Description
-                            </div>
-                            <div class="input -pad">
-                                 <textarea name="description" class="-textarea" placeholder="Add description"></textarea>
-                            </div>
-                        </div>
-                        <div class="categories field">
-                            <div class="label -pad">
-                                Categories
-                            </div>
-                            <div class="input -pad">
-                                <select name="category" class="-select" required>
-                                    <option value="">
-                                        Select Category
-                                    </option>
-                                    <option value="instrument">
-                                        Instrument
-                                    </option>
-                                    <option value="video">
-                                        Video
-                                    </option>
-                                    <option value="music">
-                                        Music
-                                    </option>
-                                    <option value="artifact">
-                                        Artifact
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="submit">
-                            <div></div>
-                            <div class="button -pad">
-                                <button class="-button" name="method" value="upload">
-                                    Upload
-                                </button>
-                            </div>
+                        <div></div>
+                        <div style="
+                            padding: 1rem;
+                            text-align: center;">
+                            <button style="
+                                background-color: #5c6;"
+                                name="method"
+                                value="upload">
+                                UPLOAD
+                            </button>
                         </div>
                     </div>
                 </form>
@@ -189,33 +203,37 @@ require_once "common.php";
         </div>
         <script src="script.js"></script>
         <script>
-            let panelMedia = document.getElementById("panelMedia");
-            let inputMedia = document.getElementById("inputMedia");
+            const panelPreview = document.getElementById("panelPreview");
+            const inputFile = document.getElementById("inputFile");
 
-            function inputMedia_change(event) {
+            inputFile.onchange = (event) => {
                 let file = event.target.files[0];
                 let reader = new FileReader();
 
                 reader.onload = (event) => {
-                    panelMedia.innerHTML = "";
+                    panelPreview.innerHTML = "";
 
                     if (file.type.includes("image")) {
                         let image = document.createElement("img");
+                        image.style.width = "100%";
+                        image.style.maxHeight = "20rem";
+                        image.style.objectFit = "contain";
                         image.src = event.target.result;
-                        panelMedia.innerHTML = "";
-                        panelMedia.appendChild(image);
+                        panelPreview.appendChild(image);
                     } else if (file.type.includes("video")) {
                         let video = document.createElement("video");
+                        video.style.width = "100%";
+                        video.style.maxHeight = "20rem";
+                        video.style.objectFit = "contain";
                         video.src = event.target.result;
                         video.controls = true;
-                        panelMedia.innerHTML = "";
-                        panelMedia.appendChild(video);
+                        panelPreview.appendChild(video);
                     } else if (file.type.includes("audio")) {
                         let audio = document.createElement("audio");
+                        audio.style.width = "100%";
                         audio.src = event.target.result;
                         audio.controls = true;
-                        panelMedia.innerHTML = "";
-                        panelMedia.appendChild(audio);
+                        panelPreview.appendChild(audio);
                     }
                 }
 

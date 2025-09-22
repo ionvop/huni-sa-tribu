@@ -4,16 +4,20 @@ chdir("../../");
 require_once "common.php";
 $db = new SQLite3("database.db");
 
+if (isset($_GET["id"]) == false) {
+    alert("This content does not exist.");
+}
+
 $query = <<<SQL
     SELECT * FROM `content` WHERE `id` = :id
 SQL;
 
 $stmt = $db->prepare($query);
 $stmt->bindValue(":id", $_GET["id"]);
-$post = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+$content = $stmt->execute()->fetchArray();
 
-if ($post == false) {
-    alert("Invalid post.");
+if ($content == false) {
+    alert("This content does not exist.");
 }
 
 ?>
@@ -21,257 +25,384 @@ if ($post == false) {
 <html>
     <head>
         <title>
-            Content Management
+            Edit Content | Huni Sa Tribu
         </title>
         <base href="../../">
         <link rel="stylesheet" href="style.css">
         <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
-            body > .main {
-                display: grid;
-                grid-template-columns: max-content 1fr;
-                height: 100%;
-                overflow: hidden;
-
-                & > .content {
-                    overflow: hidden;
-                
-                    & > .box {
-                        display: grid;
-                        grid-template-columns: repeat(2, 1fr);
-                        height: 100%;
-                        border: 3px solid #555;
-                        border-radius: 1rem;
-
-                        & > .media {
-                            display: grid;
-                            grid-template-rows: minmax(0, 1fr) max-content;
-                            overflow: hidden;
-
-                            & > .preview {
-                                overflow: hidden;
-
-                                & > .box {
-                                    box-sizing: border-box;
-                                    height: 100%;
-                                    border: 1px solid #555;
-                                    border-radius: 1rem;
-                                    overflow: hidden;
-
-                                    & > img {
-                                        box-sizing: border-box;
-                                        max-width: 100%;
-                                        max-height: 100%;
-                                    }
-
-                                    & > video {
-                                        max-width: 100%;
-                                        max-height: 100%;
-                                    }
-                                }
-                            }
-                        }
-
-                        & > .form {
-                            overflow: auto;
-
-                            & > .field {
-                                & > .input {
-                                    padding-top: 0rem;
-                                }
-                            }
-
-                            & > .submit {
-                                display: grid;
-                                grid-template-columns: 1fr max-content max-content;
-
-                                & > .delete {
-                                    & > button {
-                                        background-color: #500;
-                                        color: #fff;
-                                    }
-                                }
-
-                                & > .button {
-                                    & > button {
-                                        background-color: var(--theme-green-dark);
-                                        color: #fff;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            button {
+                color: #fff;
+                border-radius: 2rem;
             }
 
-            .-input {
-                border: 1px solid #555;
+            input {
+                background-color: #fff5;
+                color: #fff;
+                backdrop-filter: blur(5px);
+                border: 1px solid #fff;
+                border-radius: 1rem;
             }
 
-            .-select {
-                border: 1px solid #555;
+            select {
+                background-color: #fff5;
+                color: #fff;
+                backdrop-filter: blur(5px);
+                border: 1px solid #fff;
+                border-radius: 1rem;
             }
 
-            .-textarea {
-                border: 1px solid #555;
+            option {
+                background-color: #fff;
+                color: #000;
+            }
+
+            textarea {
+                background-color: #fff5;
+                color: #fff;
+                backdrop-filter: blur(5px);
+                border: 1px solid #fff;
+                border-radius: 1rem;
             }
         </style>
     </head>
     <body>
-        <div class="main">
-            <?=renderNavigation("content", "new")?>
-            <div class="content -pad">
-                <form action="server.php" class="-form box" method="post" id="formEdit" enctype="multipart/form-data">
-                    <div class="media">
-                        <div class="preview -pad">
-                            <div class="box -pad -center__flex" id="panelMedia">
-                                <?php
-                                    $filepath = "uploads/{$post['file']}";
+        <div style="
+            padding: 5rem;
+            height: 100%;
+            box-sizing: border-box;
+            overflow: auto;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('assets/home.jpg');
+            background-size: cover;
+            background-position: bottom;">
+            <div style="
+                display: grid;
+                grid-template-columns: max-content 1fr;">
+                <a style="
+                    display: block;
+                    padding: 1rem;"
+                    href="content/">
+                    BACK TO HOME
+                </a>
+                <div></div>
+            </div>
+            <div style="
+                padding: 1rem;
+                padding-top: 5rem;
+                font-size: 2rem;
+                font-weight: bold;">
+                Upload a Content
+            </div>
+            <div style="
+                padding: 1rem;">
+                <form style="
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    background-color: #0005;"
+                    action="server.php"
+                    method="post"
+                    enctype="multipart/form-data">
+                    <div style="
+                        padding: 1rem;">
+                        <div style="
+                            padding: 1rem;
+                            font-weight: bold;">
+                            CATEGORY
+                        </div>
+                        <div style="
+                            padding: 1rem;
+                            padding-top: 0rem;">
+                            <select name="category"
+                                required>
+                                <option value="music"
+                                    <?=$content["category"] == "music" ? "selected" : ""?>>
+                                    Music
+                                </option>
+                                <option value="video"
+                                    <?=$content["category"] == "video" ? "selected" : ""?>>
+                                    Video
+                                </option>
+                                <option value="artifact"
+                                    <?=$content["category"] == "artifact" ? "selected" : ""?>>
+                                    Artifact
+                                </option>
+                                <option value="instrument"
+                                    <?=$content["category"] == "instrument" ? "selected" : ""?>>
+                                    instrument
+                                </option>
+                            </select>
+                        </div>
+                        <div style="
+                            padding: 1rem;
+                            font-weight: bold;">
+                            TITLE
+                        </div>
+                        <div style="
+                            padding: 1rem;
+                            padding-top: 0rem;">
+                            <input name="title"
+                                value="<?=htmlentities($content["title"])?>"
+                                required>
+                        </div>
+                        <div style="
+                            padding: 1rem;
+                            font-weight: bold;">
+                            TRIBE
+                        </div>
+                        <div style="
+                            padding: 1rem;
+                            padding-top: 0rem;">
+                            <select name="tribe"
+                                required>
+                                <option value="kagan"
+                                    <?=$content["tribe"] == "kagan" ? "selected" : ""?>>
+                                    Kagan
+                                </option>
+                                <option value="mandaya"
+                                    <?=$content["tribe"] == "mandaya" ? "selected" : ""?>>
+                                    Mandaya
+                                </option>
+                                <option value="mansaka"
+                                    <?=$content["tribe"] == "mansaka" ? "selected" : ""?>>
+                                    Mansaka
+                                </option>
+                            </select>
+                        </div>
+                        <div style="
+                            padding: 1rem;
+                            font-weight: bold;">
+                            DESCRIPTION
+                        </div>
+                        <div style="
+                            padding: 1rem;
+                            padding-top: 0rem;">
+                            <textarea name="description"><?=htmlentities($content["description"])?></textarea>
+                        </div>
+                    </div>
+                    <div style="
+                        display: grid;
+                        grid-template-rows: repeat(2, max-content) 1fr repeat(2, max-content);
+                        padding: 1rem;">
+                        <div style="
+                            padding: 1rem;
+                            text-align: center;"
+                            id="panelPreview">
+                            <?php
+                                $type = getFileType($content["file"]);
 
-                                    if (strpos(mime_content_type($filepath), "image/") === 0) {
+                                switch ($type) {
+                                    case "image":
                                         echo <<<HTML
-                                            <img src="$filepath">
+                                            <img style="
+                                                width: 100%;
+                                                max-height: 20rem;
+                                                object-fit: contain;"
+                                                src="uploads/{$content['file']}">
                                         HTML;
-                                    } else if (strpos(mime_content_type($filepath), "video/") === 0) {
+
+                                        break;
+                                    case "video":
                                         echo <<<HTML
-                                            <video controls>
-                                                <source src="$filepath">
-                                            </video>
+                                            <video style="
+                                                width: 100%;
+                                                max-height: 20rem;
+                                                object-fit: contain;"
+                                                src="uploads/{$content['file']}"
+                                                controls></video>
                                         HTML;
-                                    } else if (strpos(mime_content_type($filepath), "audio/") === 0) {
+
+                                        break;
+                                    case "audio":
                                         echo <<<HTML
-                                            <audio controls>
-                                                <source src="$filepath">
-                                            </audio>
+                                            <audio style="
+                                                width: 100%;"
+                                                src="uploads/{$content['file']}"
+                                                controls></audio>
                                         HTML;
-                                    }
-                                ?>
-                            </div>
+
+                                        break;
+                                }
+                            ?>
                         </div>
-                        <div class="upload -pad -center">
-                            <input type="file" id="inputMedia" accept="image/*, video/*, audio/*" name="media">
+                        <div style="
+                            padding: 1rem;
+                            text-align: center;">
+                            <input style="
+                                padding: 0rem;
+                                width: initial;
+                                background-color: transparent;
+                                border: none;"
+                                type="file"
+                                name="file"
+                                accept="image/*, video/*, audio/*"
+                                id="inputFile">
                         </div>
-                    </div>
-                    <div class="form">
-                        <div class="title field">
-                            <div class="label -pad">
-                                Title
-                            </div>
-                            <div class="input -pad">
-                                <input type="text" class="-input" name="title" value="<?=htmlentities($post["title"])?>" required>
-                            </div>
+                        <div></div>
+                        <div style="
+                            padding: 1rem;
+                            text-align: center;">
+                            <?php
+                                $query = <<<SQL
+                                    SELECT * FROM `qr` WHERE `content_id` = :id
+                                SQL;
+
+                                $stmt = $db->prepare($query);
+                                $stmt->bindValue(":id", $content["id"]);
+                                $qr = $stmt->execute()->fetchArray();
+
+                                if ($qr == false) {
+                                    echo <<<HTML
+                                        <button style="
+                                            background-color: #000a;"
+                                            name="method"
+                                            value="generateQr">
+                                            <div style="
+                                                display: grid;
+                                                grid-template-columns: repeat(2, max-content);">
+                                                <div style="
+                                                    display: flex;
+                                                    align-items: center;">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M120-560v-240q0-17 11.5-28.5T160-840h240q17 0 28.5 11.5T440-800v240q0 17-11.5 28.5T400-520H160q-17 0-28.5-11.5T120-560Zm80-40h160v-160H200v160Zm-80 440v-240q0-17 11.5-28.5T160-440h240q17 0 28.5 11.5T440-400v240q0 17-11.5 28.5T400-120H160q-17 0-28.5-11.5T120-160Zm80-40h160v-160H200v160Zm320-360v-240q0-17 11.5-28.5T560-840h240q17 0 28.5 11.5T840-800v240q0 17-11.5 28.5T800-520H560q-17 0-28.5-11.5T520-560Zm80-40h160v-160H600v160Zm160 480v-80h80v80h-80ZM520-360v-80h80v80h-80Zm80 80v-80h80v80h-80Zm-80 80v-80h80v80h-80Zm80 80v-80h80v80h-80Zm80-80v-80h80v80h-80Zm0-160v-80h80v80h-80Zm80 80v-80h80v80h-80Z"/></svg>
+                                                </div>
+                                                <div style="
+                                                    display: flex;
+                                                    align-items: center;
+                                                    padding-left: 1rem;">
+                                                    Generate QR
+                                                </div>
+                                            </div>
+                                        </button>
+                                    HTML;
+                                } else {
+                                    echo <<<HTML
+                                        <a href="visitors/qr/view?id={$qr['id']}">
+                                            <button style="
+                                                background-color: #000a;"
+                                                type="button">
+                                                <div style="
+                                                    display: grid;
+                                                    grid-template-columns: repeat(2, max-content);">
+                                                    <div style="
+                                                        display: flex;
+                                                        align-items: center;">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M120-560v-240q0-17 11.5-28.5T160-840h240q17 0 28.5 11.5T440-800v240q0 17-11.5 28.5T400-520H160q-17 0-28.5-11.5T120-560Zm80-40h160v-160H200v160Zm-80 440v-240q0-17 11.5-28.5T160-440h240q17 0 28.5 11.5T440-400v240q0 17-11.5 28.5T400-120H160q-17 0-28.5-11.5T120-160Zm80-40h160v-160H200v160Zm320-360v-240q0-17 11.5-28.5T560-840h240q17 0 28.5 11.5T840-800v240q0 17-11.5 28.5T800-520H560q-17 0-28.5-11.5T520-560Zm80-40h160v-160H600v160Zm160 480v-80h80v80h-80ZM520-360v-80h80v80h-80Zm80 80v-80h80v80h-80Zm-80 80v-80h80v80h-80Zm80 80v-80h80v80h-80Zm80-80v-80h80v80h-80Zm0-160v-80h80v80h-80Zm80 80v-80h80v80h-80Z"/></svg>
+                                                    </div>
+                                                    <div style="
+                                                        display: flex;
+                                                        align-items: center;
+                                                        padding-left: 1rem;">
+                                                        View QR
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        </a>
+                                    HTML;
+                                }
+                            ?>
                         </div>
-                        <div class="tribe field">
-                            <div class="label -pad">
-                                Tribe
-                            </div>
-                            <div class="input -pad">
-                                <select name="tribe" class="-select">
-                                    <option value="ata-manobo" <?=$post["tribe"] == "ata-manobo" ? "selected" : ""?>>
-                                        Ata-Manobo
-                                    </option>
-                                    <option value="mandaya" <?=$post["tribe"] == "mandaya" ? "selected" : ""?>>
-                                        Mandaya
-                                    </option>
-                                    <option value="mansaka" <?=$post["tribe"] == "mansaka" ? "selected" : ""?>>
-                                        Mansaka
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="description field">
-                            <div class="label -pad">
-                                Description
-                            </div>
-                            <div class="input -pad">
-                                <textarea name="description" class="-textarea" placeholder="Add description"><?=htmlentities($post["description"])?></textarea>
-                            </div>
-                        </div>
-                        <div class="categories field">
-                            <div class="label -pad">
-                                Categories
-                            </div>
-                            <div class="input -pad">
-                                <select name="category" class="-select">
-                                     <option value="instrument" <?=$post["category"] == "instrument" ? "selected" : ""?>>
-                                        Instrument
-                                    </option>
-                                    <option value="video" <?=$post["category"] == "video" ? "selected" : ""?>>
-                                        Video
-                                    </option>
-                                    <option value="music" <?=$post["category"] == "music" ? "selected" : ""?>>
-                                        Music
-                                    </option>
-                                    <option value="artifact" <?=$post["category"] == "artifact" ? "selected" : ""?>>
-                                        Artifact
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="submit">
+                        <div style="
+                            display: grid;
+                            grid-template-columns: 1fr repeat(2, max-content) 1fr;">
                             <div></div>
-                            <div class="delete -pad">
-                                <button type="button" class="-button" id="btnDelete">
-                                    Delete
+                            <div style="
+                                padding: 1rem;">
+                                <button style="
+                                    background-color: #000a;"
+                                    name="method"
+                                    value="archive"
+                                    id="btnArchive">
+                                    <div style="
+                                        display: grid;
+                                        grid-template-columns: repeat(2, max-content);">
+                                        <div style="
+                                            display: flex;
+                                            align-items: center;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M280-120q-33 0-56.5-23.5T200-200v-520q-17 0-28.5-11.5T160-760q0-17 11.5-28.5T200-800h160q0-17 11.5-28.5T400-840h160q17 0 28.5 11.5T600-800h160q17 0 28.5 11.5T800-760q0 17-11.5 28.5T760-720v520q0 33-23.5 56.5T680-120H280Zm120-160q17 0 28.5-11.5T440-320v-280q0-17-11.5-28.5T400-640q-17 0-28.5 11.5T360-600v280q0 17 11.5 28.5T400-280Zm160 0q17 0 28.5-11.5T600-320v-280q0-17-11.5-28.5T560-640q-17 0-28.5 11.5T520-600v280q0 17 11.5 28.5T560-280Z"/></svg>
+                                        </div>
+                                        <div style="
+                                            display: flex;
+                                            align-items: center;
+                                            padding-left: 1rem;">
+                                            Archive
+                                        </div>
+                                    </div>
                                 </button>
                             </div>
-                            <div class="button -pad">
-                                <button class="-button" name="method" value="edit">
-                                    Save Changes
+                            <div style="
+                                padding: 1rem;">
+                                <button style="
+                                    background-color: #5c6;"
+                                    name="method"
+                                    value="edit">
+                                    <div style="
+                                        display: grid;
+                                        grid-template-columns: repeat(2, max-content);">
+                                        <div style="
+                                            display: flex;
+                                            align-items: center;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h447q16 0 30.5 6t25.5 17l114 114q11 11 17 25.5t6 30.5v447q0 33-23.5 56.5T760-120H200Zm280-120q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35ZM280-560h280q17 0 28.5-11.5T600-600v-80q0-17-11.5-28.5T560-720H280q-17 0-28.5 11.5T240-680v80q0 17 11.5 28.5T280-560Z"/></svg>
+                                        </div>
+                                        <div style="
+                                            display: flex;
+                                            align-items: center;
+                                            padding-left: 1rem;">
+                                            Save
+                                        </div>
+                                    </div>
                                 </button>
                             </div>
+                            <div></div>
                         </div>
                     </div>
-                    <input type="hidden" name="id" value="<?=$post["id"]?>">
+                    <input type="hidden"
+                        name="id"
+                        value="<?=$content["id"]?>">
                 </form>
             </div>
         </div>
         <script src="script.js"></script>
         <script>
-            let panelMedia = document.getElementById("panelMedia");
-            let inputMedia = document.getElementById("inputMedia");
-            let formEdit = document.getElementById("formEdit");
-            let btnDelete = document.getElementById("btnDelete");
+            const panelPreview = document.getElementById("panelPreview");
+            const inputFile = document.getElementById("inputFile");
+            const btnArchive = document.getElementById("btnArchive");
 
-            inputMedia.onchange = (event) => {
+            inputFile.onchange = (event) => {
                 let file = event.target.files[0];
                 let reader = new FileReader();
 
                 reader.onload = (event) => {
-                    panelMedia.innerHTML = "";
+                    panelPreview.innerHTML = "";
 
                     if (file.type.includes("image")) {
                         let image = document.createElement("img");
+                        image.style.width = "100%";
+                        image.style.maxHeight = "20rem";
+                        image.style.objectFit = "contain";
                         image.src = event.target.result;
-                        panelMedia.innerHTML = "";
-                        panelMedia.appendChild(image);
+                        panelPreview.appendChild(image);
                     } else if (file.type.includes("video")) {
                         let video = document.createElement("video");
+                        video.style.width = "100%";
+                        video.style.maxHeight = "20rem";
+                        video.style.objectFit = "contain";
                         video.src = event.target.result;
                         video.controls = true;
-                        panelMedia.innerHTML = "";
-                        panelMedia.appendChild(video);
+                        panelPreview.appendChild(video);
                     } else if (file.type.includes("audio")) {
                         let audio = document.createElement("audio");
+                        audio.style.width = "100%";
                         audio.src = event.target.result;
                         audio.controls = true;
-                        panelMedia.innerHTML = "";
-                        panelMedia.appendChild(audio);
+                        panelPreview.appendChild(audio);
                     }
                 }
 
                 reader.readAsDataURL(file);
             }
 
-            btnDelete.onclick = () => {
-                if (confirm("Are you sure you want to delete this post?") == false) return;
-                let input = document.createElement("input");
-                input.type = "hidden";
-                input.name = "method";
-                input.value = "delete";
-                formEdit.appendChild(input);
-                formEdit.submit();
+            btnArchive.onclick = () => {
+                if (confirm("Are you sure you want to archive this content?") == false) return false;
             }
         </script>
     </body>
