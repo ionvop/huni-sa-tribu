@@ -1,7 +1,5 @@
 <?php
 
-require_once "config.php";
-
 /**
  * Prints the given message and exits the script.
  *
@@ -46,38 +44,6 @@ function alert($message, $redirect = "") {
     exit;
 }
 
-/**
- * Sends an HTTP request using cURL and returns the response.
- *
- * This function initiates a cURL session to send an HTTP request to the specified URL using the given method, headers, 
- * and data. It supports custom request methods and bypasses SSL verification. If the request fails, the function returns false.
- *
- * @param string $url     The URL to which the request is sent.
- * @param string $method  The HTTP method to use for the request (e.g., 'GET', 'POST', 'PUT', 'DELETE').
- * @param array  $headers An array of HTTP headers to include in the request.
- * @param mixed  $data    The data to send with the request. Typically an associative array or a JSON string.
- *
- * @return mixed The response from the server as a string, or false if the request fails.
- */
-function sendCurl($url, $method, $headers, $data) {
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    $result = curl_exec($ch);
-
-    if (curl_errno($ch) != 0) {
-        throw new Exception(curl_error($ch));
-    }
-
-    curl_close($ch);
-    return $result;
-}
-
 function getUser() {
     $db = new SQLite3("database.db");
 
@@ -91,7 +57,7 @@ function getUser() {
 
     $stmt = $db->prepare($query);
     $stmt->bindValue(":session", $_COOKIE["session"]);
-    $user = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+    $user = $stmt->execute()->fetchArray();
 
     if ($user == false) {
         return false;
@@ -100,273 +66,460 @@ function getUser() {
     if ($user["session"] == null) {
         return false;
     }
-    
+
     return $user;
 }
 
-function renderHeader($type) {
-    switch ($type) {
-        case "login":
-            return <<<HTML
-                <div class="-header">
-                    <div></div>
-                    <div class="title">
-                        <div class="title -pad -title">
-                            Huni sa Tribu
-                        </div>
-                        <div class="subtitle -pad">
-                            Administrative Access
-                        </div>
-                    </div>
-                    <div></div>
-                </div>
-            HTML;
+function renderHeader($page) {
+    $eval = function($x) {
+        return $x;
+    };
 
-            break;
-        case "home":
-            return <<<HTML
-                <div class="-header -header--user">
-                    <div></div>
-                    <div class="title">
-                        <div class="title -pad -title">
-                            Huni sa Tribu
-                        </div>
-                        <div class="subtitle -pad">
-                            Administrative Access
-                        </div>
-                    </div>
-                    <div></div>
-                    <form action="server.php" class="-form logout -pad -center__flex" method="post" enctype="multipart/form-data">
-                        <button class="-button" name="method" value="logout">
-                            <div class="-iconlabel">
-                                <div class="icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#111111"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/></svg>
-                                </div>
-                                <div class="label">
-                                    Logout
-                                </div>
-                            </div>
-                        </button>
-                    </form>
+    return <<<HTML
+        <div style="
+            display: grid;
+            grid-template-columns: max-content 1fr repeat(4, max-content);
+            background-image: linear-gradient(to right, #000, #030);">
+            <div>
+                <div style="
+                    padding: 1rem;
+                    font-size: 1.5rem;
+                    font-family: 'Times New Roman', Times, serif;">
+                    HUNI SA TRIBU
                 </div>
-            HTML;
-
-            break;
-        case "content":
-            return <<<HTML
-                <div class="-header__content">
-                    <a href="./" class="-a back -pad">
-                        <div class="button -pad -center__flex">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="m313-440 196 196q12 12 11.5 28T508-188q-12 11-28 11.5T452-188L188-452q-6-6-8.5-13t-2.5-15q0-8 2.5-15t8.5-13l264-264q11-11 27.5-11t28.5 11q12 12 12 28.5T508-715L313-520h447q17 0 28.5 11.5T800-480q0 17-11.5 28.5T760-440H313Z"/></svg>
-                        </div>
-                        <div class="label -pad -center__flex">
-                            Back to Admin
-                        </div>
-                    </a>
-                    <div class="title">
-                        <div class="title -pad -title">
-                            Content Management
-                        </div>
-                        <div class="subtitle -pad">
-                            Manage cultural artifacts and media
-                        </div>
-                    </div>
-                    <div></div>
+                <div style="
+                    padding: 1rem;
+                    padding-top: 0rem;
+                    color: #aaa;">
+                    Cultural Heritage Museum
                 </div>
-            HTML;
-
-            break;
-    }
+            </div>
+            <div></div>
+            <a style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 1rem;"
+                href="home/">
+                <div style="
+                    padding: 1rem;
+                    {$eval($page == 'home' ? 'background-color: #5c6;' : '')}
+                    {$eval($page == 'home' ? 'color: #000;' : 'color: #fff;')}
+                    border-radius: 1rem;">
+                    Home
+                </div>
+            </a>
+            <a style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 1rem;"
+                href="content/">
+                <div style="
+                    padding: 1rem;
+                    {$eval($page == 'content' ? 'background-color: #5c6;' : '')}
+                    {$eval($page == 'content' ? 'color: #000;' : 'color: #fff;')}
+                    border-radius: 1rem;">
+                    Content Management
+                </div>
+            </a>
+            <a style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 1rem;"
+                href="visitors/">
+                <div style="
+                    padding: 1rem;
+                    {$eval($page == 'visitors' ? 'background-color: #5c6;' : '')}
+                    {$eval($page == 'visitors' ? 'color: #000;' : 'color: #fff;')}
+                    border-radius: 1rem;">
+                    Visitors Management
+                </div>
+            </a>
+            <form style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 1rem;
+                cursor: pointer;"
+                action="server.php"
+                method="post"
+                enctype="multipart/form-data"
+                id="g_btnLogout">
+                <div style="
+                    padding: 1rem;
+                    color: #fff;
+                    border-radius: 1rem;">
+                    Logout
+                </div>
+                <input type="hidden"
+                    name="method"
+                    value="logout">
+            </form>
+        </div>
+    HTML;
 }
 
-function renderNavigation($type, $selected) {
-    switch ($type) {
-        case "content_old":
-            $allSelected = "";
-            $musicSelected = "";
-            $instrumentsSelected = "";
-            $videosSelected = "";
+function renderVisitorTabs($tab) {
+    $eval = function($x) {
+        return $x;
+    };
 
-            if ($selected == "all") {
-                $allSelected = "tab--selected";
-            } else if ($selected == "music") {
-                $musicSelected = "tab--selected";
-            } else if ($selected == "instruments") {
-                $instrumentsSelected = "tab--selected";
-            } else if ($selected == "videos") {
-                $videosSelected = "tab--selected";
-            }
-
-            return <<<HTML
-                <div class="-navigation">
-                    <div class="title -pad -center">
-                        CONTENT CATEGORIES
-                    </div>
-                    <a href="content/" class="-a all tab {$allSelected} -pad">
-                        <div class="box -pad -center">
-                            All Content
-                        </div>
-                    </a>
-                    <a href="content/?type=music" class="-a music tab {$musicSelected} -pad">
-                        <div class="box -pad -center">
-                            Music
-                        </div>
-                    </a>
-                    <a href="content/?type=instrument" class="-a instruments tab {$instrumentsSelected} -pad">
-                        <div class="box -pad -center">
-                            Instruments
-                        </div>
-                    </a>
-                    <a href="content/?type=video" class="-a videos tab {$videosSelected} -pad">
-                        <div class="box -pad -center">
-                            Videos
-                        </div>
-                    </a>
+    return <<<HTML
+        <div style="
+            display: grid;
+            grid-template-columns: repeat(3, max-content) 1fr;
+            padding-top: 5rem;">
+            <a style="
+                display: block;
+                padding: 1rem;"
+                href="visitors/">
+                <div style="
+                    padding: 1rem;
+                    border-radius: 1rem;
+                    {$eval($tab == 'overview' ? 'background-color: #5c6;' : '')}">
+                    Overview
                 </div>
-            HTML;
-        case "content":
-            $allSelected = "";
-            $musicSelected = "";
-            $instrumentsSelected = "";
-            $videosSelected = "";
-            $artifactsSelected = "";
-
-            if ($selected == "all") {
-                $allSelected = "box--selected";
-            } else if ($selected == "music") {
-                $musicSelected = "box--selected";
-            } else if ($selected == "instrument") {
-                $instrumentsSelected = "box--selected";
-            } else if ($selected == "video") {
-                $videosSelected = "box--selected";
-            } else if ($selected == "artifact") {
-                $artifactsSelected = "box--selected";
-            }
-
-            return <<<HTML
-                <div class="-navigation -navigation--content">
-                    <a href="./" class="-a back -pad">
-                        <div class="-iconlabel">
-                            <div class="icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="m313-440 196 196q12 12 11.5 28T508-188q-12 11-28 11.5T452-188L188-452q-6-6-8.5-13t-2.5-15q0-8 2.5-15t8.5-13l264-264q11-11 27.5-11t28.5 11q12 12 12 28.5T508-715L313-520h447q17 0 28.5 11.5T800-480q0 17-11.5 28.5T760-440H313Z"/></svg>
-                            </div>
-                            <div class="label">
-                                Back to Admin
-                            </div>
-                        </div>
-                    </a>
-                    <div class="title -pad -title">
-                        Content Management
-                    </div>
-                    <div class="description -pad">
-                        Manage cultural artifacts and media
-                    </div>
-                    <div class="categories">
-                        <div class="title -pad">
-                            CONTENT CATEGORIES
-                        </div>
-                        <div class="tabs">
-                            <a href="content/" class="-a all tab -pad">
-                                <div class="box {$allSelected} -pad">
-                                    All Content
-                                </div>
-                            </a>
-                            <a href="content/?category=music" class="-a music tab -pad">
-                                <div class="box {$musicSelected} -pad">
-                                    Music
-                                </div>
-                            </a>
-                            <a href="content/?category=instrument" class="-a instruments tab -pad">
-                                <div class="box {$instrumentsSelected} -pad">
-                                    Instruments
-                                </div>
-                            </a>
-                            <a href="content/?category=video" class="-a videos tab -pad">
-                                <div class="box {$videosSelected} -pad">
-                                    Videos
-                                </div>
-                            </a>
-                            <a href="content/?category=artifact" class="-a artifacts tab -pad">
-                                <div class="box {$artifactsSelected} -pad">
-                                    Artifacts
-                                </div>
-                            </a>
-                        </div>
-                    </div>
+            </a>
+            <a style="
+                display: block;
+                padding: 1rem;
+                padding-left: 0rem;"
+                href="visitors/visitors/">
+                <div style="
+                    padding: 1rem;
+                    border-radius: 1rem;
+                    {$eval($tab == 'visitors' ? 'background-color: #5c6;' : '')}">
+                    Visitors
                 </div>
-            HTML;
-        case "visitor":
-            $visitorSelected = "";
-            $qrSelected = "";
-            $analyticsSelected = "";
-
-            if ($selected == "visitor") {
-                $visitorSelected = "box--selected";
-            } else if ($selected == "qr") {
-                $qrSelected = "box--selected";
-            } else if ($selected == "analytics") {
-                $analyticsSelected = "box--selected";
-            }
-
-            return <<<HTML
-                <div class="-navigation -navigation--visitor">
-                    <a href="./" class="-a back -pad">
-                        <div class="-iconlabel">
-                            <div class="icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="m313-440 196 196q12 12 11.5 28T508-188q-12 11-28 11.5T452-188L188-452q-6-6-8.5-13t-2.5-15q0-8 2.5-15t8.5-13l264-264q11-11 27.5-11t28.5 11q12 12 12 28.5T508-715L313-520h447q17 0 28.5 11.5T800-480q0 17-11.5 28.5T760-440H313Z"/></svg>
-                            </div>
-                            <div class="label">
-                                Back to Admin
-                            </div>
-                        </div>
-                    </a>
-                    <div class="title -pad -title">
-                        Visitor Management
-                    </div>
-                    <div class="description -pad">
-                        Visitors Engagement and Activities
-                    </div>
-                    <div class="categories">
-                        <div class="title -pad">
-                            VISITOR CATEGORIES
-                        </div>
-                        <div class="tabs">
-                            <a href="visitor/" class="-a all tab -pad">
-                                <div class="box {$visitorSelected} -pad">
-                                    Visitors
-                                </div>
-                            </a>
-                            <a href="visitor/qr/" class="-a music tab -pad">
-                                <div class="box {$qrSelected} -pad">
-                                    QR Codes
-                                </div>
-                            </a>
-                            <a href="visitor/analytics/" class="-a instruments tab -pad">
-                                <div class="box {$analyticsSelected} -pad">
-                                    Analytics
-                                </div>
-                            </a>
-                        </div>
-                    </div>
+            </a>
+            <a style="
+                display: block;
+                padding: 1rem;
+                padding-left: 0rem;"
+                href="visitors/qr/">
+                <div style="
+                    padding: 1rem;
+                    border-radius: 1rem;
+                    {$eval($tab == 'qr' ? 'background-color: #5c6;' : '')}">
+                    QR Scans
                 </div>
-            HTML;
-    }
+            </a>
+        </div>
+    HTML;
 }
 
-function buildQuery(SQLite3 $db, string $query, array $conditons = [], array $binds = [], string $options = ""): SQLite3Result|false {
-    if (count($conditons) > 0) {
-        $query .= " WHERE " . implode(" AND ", $conditons);
+function getFileType($file) {
+    if (strpos(mime_content_type("uploads/{$file}"), "image/") === 0) {
+        return "image";
+    } else if (strpos(mime_content_type("uploads/{$file}"), "video/") === 0) {
+        return "video";
+    } else if (strpos(mime_content_type("uploads/{$file}"), "audio/") === 0) {
+        return "audio";
     }
 
-    $query .= " {$options}";
+    return false;
+}
+
+function getQrContent($qr) {
+    $db = new SQLite3("database.db");
+
+    $query = <<<SQL
+        SELECT * FROM `content` WHERE `id` = :id
+    SQL;
+
     $stmt = $db->prepare($query);
+    $stmt->bindValue(":id", $qr["content_id"]);
+    return $stmt->execute()->fetchArray();
+}
 
-    foreach ($binds as $key => $value) {
-        $stmt->bindValue($key, $value);
+function getQrScans($qr) {
+    $db = new SQLite3("database.db");
+
+    $query = <<<SQL
+        SELECT COUNT(*) FROM `scans` WHERE `qr_id` = :id
+    SQL;
+
+    $result = $db->prepare($query);
+    $result->bindValue(":id", $qr["id"]);
+    return $result->execute()->fetchArray()[0];
+}
+
+function getQrLastScan($qr) {
+    $db = new SQLite3("database.db");
+
+    $query = <<<SQL
+        SELECT * FROM `scans` WHERE `qr_id` = :id ORDER BY `time` DESC LIMIT 1
+    SQL;
+
+    $result = $db->prepare($query);
+    $result->bindValue(":id", $qr["id"]);
+    $scan = $result->execute()->fetchArray();
+
+    if ($scan == false) {
+        return false;
     }
 
+    return $scan["time"];
+}
+
+function getTotalVisitors() {
+    $db = new SQLite3("database.db");
+
+    $query = <<<SQL
+        SELECT COUNT(*) FROM `visitors`
+    SQL;
+
+    $result = $db->query($query);
+    return $result->fetchArray()[0];
+}
+
+function getVisitorsWithinMonth() {
+    $db = new SQLite3("database.db");
+
+    $query = <<<SQL
+        SELECT COUNT(*)
+        FROM (
+            SELECT * FROM `visits`
+            WHERE `time` > :time
+            GROUP BY `visitor_id`
+        )
+    SQL;
+
+    $result = $db->prepare($query);
+    $result->bindValue(":time", time() - (86400 * 30));
+    return $result->execute()->fetchArray()[0];
+}
+
+function majorityHour(array $timestamps): ?int {
+    if (empty($timestamps)) {
+        return false; // No timestamps to analyze
+    }
+
+    $hourCounts = [];
+
+    foreach ($timestamps as $ts) {
+        // Ensure it's a valid integer timestamp
+        $ts = (int)$ts;
+        $hour = (int)date('G', $ts); // 'G' gives 0-23 without leading zero
+        $hourCounts[$hour] = ($hourCounts[$hour] ?? 0) + 1;
+    }
+
+    // Find the hour with the maximum count
+    arsort($hourCounts); // Sort by count descending, preserving keys
+    $majorityHour = array_key_first($hourCounts);
+
+    return $majorityHour;
+}
+
+function convertToAmPm(int $hour): string {
+    if ($hour < 0 || $hour > 23) {
+        throw new InvalidArgumentException("Hour must be between 0 and 23.");
+    }
+
+    $suffix = $hour < 12 ? 'AM' : 'PM';
+    $hour12 = $hour % 12;
+    if ($hour12 === 0) {
+        $hour12 = 12;
+    }
+
+    return $hour12 . $suffix;
+}
+
+function getPeakHour() {
+    $db = new SQLite3("database.db");
+
+    $query = <<<SQL
+        SELECT `time` FROM `visits`
+        WHERE `time` > :time
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":time", time() - (86400 * 30));
     $result = $stmt->execute();
-    return $result;
+    $timestamps = [];
+
+    while ($row = $result->fetchArray()) {
+        $timestamps[] = $row["time"] + 28800;
+    }
+
+    return convertToAmPm(majorityHour($timestamps));
+}
+
+function getReturningVisitorsRatio() {
+    $db = new SQLite3("database.db");
+
+    $query = <<<SQL
+        SELECT * FROM `visitors`
+    SQL;
+
+    $result = $db->query($query);
+    $total = 0;
+    $ratio = 0;
+
+    while ($visitor = $result->fetchArray()) {
+        $query = <<<SQL
+            SELECT COUNT(*) FROM `visits`
+            WHERE `visitor_id` = :visitor_id
+        SQL;
+
+        $stmt = $db->prepare($query);
+        $stmt->bindValue(":visitor_id", $visitor["id"]);
+        $count = $stmt->execute()->fetchArray()[0];
+
+        if ($count > 1) {
+            $ratio++;
+        }
+
+        $total++;
+    }
+
+    return $ratio / $total;
+}
+
+function getVisitorLastVisit($visitor) {
+    $db = new SQLite3("database.db");
+
+    $query = <<<SQL
+        SELECT * FROM `visits` WHERE `visitor_id` = :id ORDER BY `time` DESC
+    SQL;
+
+    $result = $db->prepare($query);
+    $result->bindValue(":id", $visitor["id"]);
+    return $result->execute()->fetchArray()["time"];
+}
+
+function getVisitorContentViews($visitor) {
+    $db = new SQLite3("database.db");
+
+    $query = <<<SQL
+        SELECT COUNT(*) FROM `scans` WHERE `visitor_id` = :id
+    SQL;
+
+    $result = $db->prepare($query);
+    $result->bindValue(":id", $visitor["id"]);
+    return $result->execute()->fetchArray()[0];
+}
+
+function getVisitorVisitCount($visitor) {
+    $db = new SQLite3("database.db");
+
+    $query = <<<SQL
+        SELECT COUNT(*) FROM `visits` WHERE `visitor_id` = :id
+    SQL;
+
+    $result = $db->prepare($query);
+    $result->bindValue(":id", $visitor["id"]);
+    return $result->execute()->fetchArray()[0];
+}
+
+function getVisitorEngagement($visitor) {
+    $db = new SQLite3("database.db");
+
+    $query = <<<SQL
+        SELECT COUNT(*) FROM `scans`
+        WHERE `time` > :time
+        GROUP BY `visitor_id`
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":time", time() - (86400 * 7));
+    $result = $stmt->execute();
+    $maxCount = 0;
+
+    while ($row = $result->fetchArray()) {
+        if ($row[0] > $maxCount) {
+            $maxCount = $row[0];
+        }
+    }
+
+    $query = <<<SQL
+        SELECT COUNT(*) FROM `scans`
+        WHERE `time` > :time
+        AND `visitor_id` = :id
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":time", time() - (86400 * 7));
+    $stmt->bindValue(":id", $visitor["id"]);
+    $count = $stmt->execute()->fetchArray()[0];
+
+    if ($maxCount == 0) {
+        return 0;
+    }
+
+    return $count / $maxCount;
+}
+
+function getTotalScans() {
+    $db = new SQLite3("database.db");
+
+    $query = <<<SQL
+        SELECT COUNT(*) FROM `scans`
+    SQL;
+
+    return $db->query($query)->fetchArray()[0];
+}
+
+function getMostScanned() {
+    $db = new SQLite3("database.db");
+
+    $query = <<<SQL
+        SELECT COUNT(*) AS `count`, `qr_id` FROM `scans`
+        GROUP BY `qr_id` ORDER BY `count` DESC
+    SQL;
+
+    $result = $db->query($query);
+    $qrId = $result->fetchArray();
+
+    if ($qrId == false) {
+        return false;
+    }
+    
+    $query = <<<SQL
+        SELECT * FROM `qr` WHERE `id` = :id
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":id", $qrId["qr_id"]);
+    $qr = $stmt->execute()->fetchArray();
+
+    $query = <<<SQL
+        SELECT * FROM `content` WHERE `id` = :id
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":id", $qr["content_id"]);
+    return $stmt->execute()->fetchArray();
+}
+
+function getScanCount($content) {
+    $db = new SQLite3("database.db");
+
+    if ($content == false) {
+        return 0;
+    }
+
+    $query = <<<SQL
+        SELECT * FROM `qr` WHERE `content_id` = :id
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":id", $content["id"]);
+    $qr = $stmt->execute()->fetchArray();
+
+    if ($qr == false) {
+        return 0;
+    }
+
+    $query = <<<SQL
+        SELECT COUNT(*) FROM `scans` WHERE `qr_id` = :id
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":id", $qr["id"]);
+    return $stmt->execute()->fetchArray()[0];
 }
 
 function aggregateData(array $data, int $currentTime): array {
@@ -443,25 +596,39 @@ function aggregateData(array $data, int $currentTime): array {
     return $result;
 }
 
-function getTotalContent() {
-    $db = new SQLite3("database.db");
-    
-    $query = <<<SQL
-        SELECT COUNT(*) FROM `content`
-    SQL;
+function renderContent($content, $maxHeight = 20) {
+    $type = getFileType($content["file"]);
 
-    $stmt = $db->prepare($query);
-    return $stmt->execute()->fetchArray(SQLITE3_NUM)[0];
-}
+    switch ($type) {
+        case "image":
+            return <<<HTML
+                <img style="
+                    width: 100%;
+                    max-height: {$maxHeight}rem;
+                    object-fit: contain;"
+                    src="uploads/{$content['file']}">
+            HTML;
 
-function getFileType($file) {
-    if (strpos(mime_content_type("uploads/{$file}"), "image/") === 0) {
-        return "image";
-    } else if (strpos(mime_content_type("uploads/{$file}"), "video/") === 0) {
-        return "video";
-    } else if (strpos(mime_content_type("uploads/{$file}"), "audio/") === 0) {
-        return "audio";
+            break;
+        case "video":
+            return <<<HTML
+                <video style="
+                    width: 100%;
+                    max-height: {$maxHeight}rem;
+                    object-fit: contain;"
+                    src="uploads/{$content['file']}"
+                    controls></video>
+            HTML;
+
+            break;
+        case "audio":
+            return <<<HTML
+                <audio style="
+                    width: 100%;"
+                    src="uploads/{$content['file']}"
+                    controls></audio>
+            HTML;
+
+            break;
     }
-
-    return false;
 }
