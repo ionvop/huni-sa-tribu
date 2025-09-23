@@ -76,7 +76,20 @@ try {
             $stmt->bindValue(":visitor_id", $visitor["id"]);
             $stmt->bindValue(":qr_id", $qr["id"]);
             $stmt->execute();
+
+            $query = <<<SQL
+                SELECT FROM `content` WHERE `id` = :id
+            SQL;
+
+            $stmt = $db->prepare($query);
+            $stmt->bindValue(":id", $qr["content_id"]);
+            $content = $stmt->execute()->fetchArray();
             http_response_code(201);
+
+            echo json_encode([
+                "data" => $content
+            ]);
+
             exit;
         case "OPTIONS":
             http_response_code(204);
