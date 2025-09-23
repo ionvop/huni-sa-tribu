@@ -10,6 +10,35 @@ if (isset($_GET["category"])) {
     $category = "all";
 }
 
+$query = <<<SQL
+    SELECT COUNT(*) FROM `content`
+SQL;
+
+$conditions = ["`is_archived` = 0"];
+$bindings = [];
+
+if (isset($_GET["category"])) {
+    $conditions[] = "`category` = :category";
+    $bindings["category"] = $_GET["category"];
+}
+
+if (isset($_GET["q"])) {
+    $conditions[] = "(`title` LIKE :q OR `description` LIKE :q OR `tribe` LIKE :q OR `category` LIKE :q)";
+    $bindings["q"] = "%{$_GET["q"]}%";
+}
+
+if (count($conditions) > 0) {
+    $query .= " WHERE " . implode(" AND ", $conditions);
+}
+
+$stmt = $db->prepare($query);
+
+foreach ($bindings as $key => $value) {
+    $stmt->bindValue(":{$key}", $value);
+}
+
+$count = $stmt->execute()->fetchArray()[0];
+
 ?>
 
 <html>
@@ -216,14 +245,7 @@ if (isset($_GET["category"])) {
                                 font-size: 1.5rem;
                                 font-weight: bold;
                                 text-align: center;">
-                                <?php
-                                    $query = <<<SQL
-                                        SELECT COUNT(*) FROM `content`
-                                    SQL;
-
-                                    $count = $db->query($query)->fetchArray()[0];
-                                    echo "Total Content: {$count}";
-                                ?>
+                                <?="Total Content: {$count}"?>
                             </div>
                             <div></div>
                             <div style="
