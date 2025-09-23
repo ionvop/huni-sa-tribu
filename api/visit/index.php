@@ -49,6 +49,15 @@ try {
                 $visitor = $stmt->execute()->fetchArray();
             }
 
+            $lastVisit = getVisitorLastVisit($visitor);
+            $lastVisit = date("Y-m-d", $lastVisit + (8 * 60 * 60));
+            $currentDate = date("Y-m-d", time() + (8 * 60 * 60));
+
+            if ($lastVisit == $currentDate) {
+                http_response_code(409);
+                exit;
+            }
+
             $query = <<<SQL
                 INSERT INTO `visits`(`visitor_id`)
                 VALUES (:visitor_id)
@@ -58,6 +67,14 @@ try {
             $stmt->bindValue(":visitor_id", $visitor["id"]);
             $stmt->execute();
             http_response_code(201);
+            
+            echo json_encode([
+                "debug" => [
+                    "lastVisit" => $lastVisit,
+                    "currentDate" => $currentDate
+                ]
+            ]);
+
             exit;
         case "OPTIONS":
             http_response_code(204);
