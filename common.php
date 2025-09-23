@@ -605,7 +605,7 @@ function renderContent($content, $maxHeight = 20) {
                 <img style="
                     width: 100%;
                     max-height: {$maxHeight}rem;
-                    object-fit: contain;"
+                    object-fit: cover;"
                     src="uploads/{$content['file']}">
             HTML;
 
@@ -615,7 +615,7 @@ function renderContent($content, $maxHeight = 20) {
                 <video style="
                     width: 100%;
                     max-height: {$maxHeight}rem;
-                    object-fit: contain;"
+                    object-fit: cover;"
                     src="uploads/{$content['file']}"
                     controls></video>
             HTML;
