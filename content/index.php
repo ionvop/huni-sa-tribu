@@ -65,7 +65,6 @@ $count = $stmt->execute()->fetchArray()[0];
                 width: 100%;
 
                 & > thead {
-                    position: sticky;
                     top: 0rem;
                 }
 
