@@ -63,28 +63,13 @@ if ($user != false) {
                 </div>
                 <div></div>
                 <div style="
-                    display: grid;
-                    grid-template-columns: 1fr repeat(2, max-content) 1fr;">
-                    <div></div>
-                    <div style="
-                        padding: 1rem;">
-                        <a href="login/">
-                            <button style="
-                                background-color: #5c6;">
-                                SIGN IN
-                            </button>
-                        </a>
-                    </div>
-                    <div style="
-                        padding: 1rem;">
-                        <a href="register/">
-                            <button style="
-                                background-color: #000a;">
-                                SIGN UP
-                            </button>
-                        </a>
-                    </div>
-                    <div></div>
+                    text-align: center;">
+                    <a href="login/">
+                        <button style="
+                            background-color: #5c6;">
+                            SIGN IN
+                        </button>
+                    </a>
                 </div>
                 <div></div>
             </div>
