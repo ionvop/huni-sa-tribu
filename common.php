@@ -426,12 +426,10 @@ function getVisitorEngagement($visitor) {
     $stmt = $db->prepare($query);
     $stmt->bindValue(":time", time() - (86400 * 7));
     $result = $stmt->execute();
-    $maxCount = 0;
+    $total = 0;
 
     while ($row = $result->fetchArray()) {
-        if ($row[0] > $maxCount) {
-            $maxCount = $row[0];
-        }
+        $total += $row[0];
     }
 
     $query = <<<SQL
@@ -445,11 +443,11 @@ function getVisitorEngagement($visitor) {
     $stmt->bindValue(":id", $visitor["id"]);
     $count = $stmt->execute()->fetchArray()[0];
 
-    if ($maxCount == 0) {
+    if ($total == 0) {
         return 0;
     }
 
-    return $count / $maxCount;
+    return $count / $total;
 }
 
 function getTotalScans() {
