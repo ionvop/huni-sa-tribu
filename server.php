@@ -162,6 +162,26 @@ function upload() {
         alert("There was an error uploading the file.");
     }
 
+    $allowedTypes = [
+        "music"    => "audio",
+        "video"    => "video",
+        "artifact" => "image",
+        "event"    => "image",
+    ];
+
+    if (!array_key_exists($_POST["category"], $allowedTypes)) {
+        alert("Invalid category specified.");
+    }
+
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime = finfo_file($finfo, $_FILES["file"]["tmp_name"]);
+    finfo_close($finfo);
+    $expectedPrefix = $allowedTypes[$_POST["category"]];
+
+    if (strpos($mime, $expectedPrefix) !== 0) {
+        alert("Invalid file type for category '{$_POST['category']}'. Expected {$expectedPrefix} file.");
+    }
+
     $filename = uniqid("file-");
     $filename .= "." . pathinfo($_FILES["file"]["name"], PATHINFO_EXTENSION);
 
@@ -205,42 +225,23 @@ function edit() {
         alert("This content does not exist.");
     }
 
-    if ($_POST["title"] == "" || $_POST["category"] == "" || $_POST["tribe"] == "") {
+    if ($_POST["title"] == "" || $_POST["tribe"] == "") {
         alert("Please fill in all fields.");
-    }
-
-    $filename = $content["file"];
-
-    if ($_FILES["file"]["error"] != 4) {
-        if ($_FILES["file"]["error"] != 0) {
-            alert("There was an error uploading the file.");
-        }
-
-        $filename = uniqid("file-");
-        $filename .= "." . pathinfo($_FILES["file"]["name"], PATHINFO_EXTENSION);
-
-        if (move_uploaded_file($_FILES["file"]["tmp_name"], "uploads/{$filename}") == false) {
-            alert("There was an error uploading the file.");
-        }
     }
 
     $query = <<<SQL
         UPDATE `content`
         SET `title` = :title,
-        `category` = :category,
         `tribe` = :tribe,
-        `description` = :description,
-        `file` = :file
+        `description` = :description
         WHERE `id` = :id
     SQL;
 
     $stmt = $db->prepare($query);
     $stmt->bindValue(":title", $_POST["title"]);
-    $stmt->bindValue(":category", $_POST["category"]);
     $stmt->bindValue(":tribe", $_POST["tribe"]);
     $stmt->bindValue(":description", $_POST["description"]);
     $stmt->bindValue(":id", $_POST["id"]);
-    $stmt->bindValue(":file", $filename);
     $stmt->execute();
     header("Location: content/");
 }
