@@ -129,15 +129,12 @@ $db = new SQLite3("database.db");
                                     $content["description"] = htmlentities($content["description"]);
                                     $type = getFileType($content["file"]);
                                     $date = date("m/d/y", $content["time"] + 28800);
+                                    $contentElement = renderContent($content, 10);
 
                                     echo <<<HTML
                                         <tr>
                                             <td>
-                                                <img style="
-                                                    width: 10rem;
-                                                    height: 10rem;
-                                                    object-fit: contain;"
-                                                    src="uploads/{$content['file']}">
+                                                $contentElement
                                             </td>
                                             <td>
                                                 {$content["title"]}
