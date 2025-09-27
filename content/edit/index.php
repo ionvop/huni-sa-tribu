@@ -113,25 +113,8 @@ if ($content == false) {
                         <div style="
                             padding: 1rem;
                             padding-top: 0rem;">
-                            <select name="category"
-                                required>
-                                <option value="music"
-                                    <?=$content["category"] == "music" ? "selected" : ""?>>
-                                    Music
-                                </option>
-                                <option value="video"
-                                    <?=$content["category"] == "video" ? "selected" : ""?>>
-                                    Video
-                                </option>
-                                <option value="artifact"
-                                    <?=$content["category"] == "artifact" ? "selected" : ""?>>
-                                    Artifact
-                                </option>
-                                <option value="instrument"
-                                    <?=$content["category"] == "instrument" ? "selected" : ""?>>
-                                    instrument
-                                </option>
-                            </select>
+                            <input value="<?=$content["category"]?>"
+                                disabled>
                         </div>
                         <div style="
                             padding: 1rem;
@@ -182,7 +165,7 @@ if ($content == false) {
                     </div>
                     <div style="
                         display: grid;
-                        grid-template-rows: repeat(2, max-content) 1fr repeat(2, max-content);
+                        grid-template-rows: max-content 1fr repeat(2, max-content);
                         padding: 1rem;">
                         <div style="
                             padding: 1rem;
@@ -224,19 +207,6 @@ if ($content == false) {
                                         break;
                                 }
                             ?>
-                        </div>
-                        <div style="
-                            padding: 1rem;
-                            text-align: center;">
-                            <input style="
-                                padding: 0rem;
-                                width: initial;
-                                background-color: transparent;
-                                border: none;"
-                                type="file"
-                                name="file"
-                                accept="image/*, video/*, audio/*"
-                                id="inputFile">
                         </div>
                         <div></div>
                         <div style="
