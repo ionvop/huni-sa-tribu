@@ -113,7 +113,7 @@ require_once "common.php";
                                 <option value="artifact">
                                     Artifact
                                 </option>
-                                <option value="events">
+                                <option value="event">
                                     Events
                                 </option>
                             </select>
