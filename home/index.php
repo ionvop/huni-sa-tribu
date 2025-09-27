@@ -75,7 +75,7 @@ require_once "common.php";
                             <div style="
                                 padding: 1rem;
                                 padding-top: 0rem;">
-                                Manage cultural artifacts, music, instruments, and video content
+                                Manage cultural artifacts, music, events, and video content
                             </div>
                             <div></div>
                             <div style="
