@@ -109,7 +109,7 @@ $db = new SQLite3("database.db");
                                     "music" => "Music",
                                     "video" => "Video",
                                     "artifact" => "Artifact",
-                                    "instrument" => "Instrument"
+                                    "event" => "Event"
                                 ];
 
                                 $tribeMap = [
