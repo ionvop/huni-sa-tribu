@@ -99,6 +99,7 @@ require_once "common.php";
                             padding: 1rem;
                             padding-top: 0rem;">
                             <select name="category"
+                                id="selectCategory"
                                 required>
                                 <option value="">
                                     Select a category
@@ -112,8 +113,8 @@ require_once "common.php";
                                 <option value="artifact">
                                     Artifact
                                 </option>
-                                <option value="instrument">
-                                    instrument
+                                <option value="events">
+                                    Events
                                 </option>
                             </select>
                         </div>
@@ -204,7 +205,28 @@ require_once "common.php";
         <script src="script.js"></script>
         <script>
             const panelPreview = document.getElementById("panelPreview");
+            const selectCategory = document.getElementById("selectCategory");
             const inputFile = document.getElementById("inputFile");
+
+            selectCategory.onchange = () => {
+                switch (selectCategory.value) {
+                    case "music": {
+                        inputFile.accept = "audio/*";
+                    } break;
+                    case "video": {
+                        inputFile.accept = "video/*";
+                    } break;
+                    case "artifact": {
+                        inputFile.accept = "image/*";
+                    } break;
+                    case "events": {
+                        inputFile.accept = "image/*";
+                    } break;
+                    default: {
+                        inputFile.accept = "image/*, video/*, audio/*";
+                    } break;
+                }
+            }
 
             inputFile.onchange = (event) => {
                 let file = event.target.files[0];
