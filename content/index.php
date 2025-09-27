@@ -228,9 +228,9 @@ $count = $stmt->execute()->fetchArray()[0];
                                 <div style="
                                     padding: 1rem;
                                     border-radius: 1rem;
-                                    <?=$category == "instrument" ? "background-color: #5c6;" : ""?>"
-                                    id="btnInstruments">
-                                    Instruments
+                                    <?=$category == "event" ? "background-color: #5c6;" : ""?>"
+                                    id="btnEvents">
+                                    Events
                                 </div>
                             </div>
                         </div>
@@ -320,7 +320,7 @@ $count = $stmt->execute()->fetchArray()[0];
                                     "music" => "Music",
                                     "video" => "Video",
                                     "artifact" => "Artifact",
-                                    "instrument" => "Instrument"
+                                    "event" => "Event"
                                 ];
 
                                 $tribeMap = [
@@ -385,7 +385,7 @@ $count = $stmt->execute()->fetchArray()[0];
             const btnMusic = document.getElementById("btnMusic");
             const btnVideo = document.getElementById("btnVideo");
             const btnArtifacts = document.getElementById("btnArtifacts");
-            const btnInstruments = document.getElementById("btnInstruments");
+            const btnEvents = document.getElementById("btnEvents");
 
             btnAll.addEventListener("click", () => {
                 let url = new URL(window.location);
@@ -411,9 +411,9 @@ $count = $stmt->execute()->fetchArray()[0];
                 location.href = url;
             });
 
-            btnInstruments.addEventListener("click", () => {
+            btnEvents.addEventListener("click", () => {
                 let url = new URL(window.location);
-                url.searchParams.set("category", "instrument");
+                url.searchParams.set("category", "event");
                 location.href = url;
             });
         </script>
