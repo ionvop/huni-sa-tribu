@@ -11,6 +11,7 @@
             display: flex;
             flex-direction: column;
             height: 100%;
+            box-sizing: border-box;
             overflow: hidden;">
             <div style="
                 flex: 1;
@@ -200,6 +201,7 @@
                                     flex: 1;
                                     min-width: 0;">
                                 </div>
+                                <div>
                                     <button style="
                                         background-color: #fec;
                                         color: #000;
@@ -238,14 +240,14 @@
                                     width: 100%;
                                     height: 10rem;
                                     object-fit: cover;"
-                                    src="assets/ata_manobo.jpg">
+                                    src="assets/mandaya.jpg">
                             </div>
                             <div style="
                                 padding: 1rem;
                                 background-color: #555;
                                 color: #aaa;
                                 line-height: 1.5rem;">
-                                The Kagan people are known for their rich cultural heritage and traditional practices. They are masters of traditional music and dance ceremonies.
+                                The Mandaya tribe is one of the major indigenous groups in Mindanao, primarily found in Davao Oriental. They are masters of traditional music and dance ceremonies.
                             </div>
                         </div>
                     </div>
@@ -267,19 +269,87 @@
                                     flex: 1;
                                     min-width: 0;">
                                 </div>
+                                <div>
                                     <button style="
                                         background-color: #fec;
                                         color: #000;
                                         border-radius: 1rem;
                                         font-weight: bold;"
-                                        id="btnKaganExplore">
+                                        id="btnMandayaExplore">
                                         Explore more
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-
+                    <div style="
+                        padding: 1rem;
+                        padding-top: 5rem;
+                        color: #edb;
+                        font-size: 1.5rem;">
+                        MANSAKA
+                    </div>
+                    <div style="
+                        padding: 1rem;
+                        padding-top: 0rem;">
+                        <div style="
+                            width: 5rem;
+                            height: 5px;
+                            background-color: #edb;">
+                        </div>
+                    </div>
+                    <div style="
+                        padding: 1rem;">
+                        <div style="
+                            border-radius: 1rem;
+                            overflow: hidden;">
+                            <div>
+                                <img style="
+                                    width: 100%;
+                                    height: 10rem;
+                                    object-fit: cover;"
+                                    src="assets/mansaka.jpg">
+                            </div>
+                            <div style="
+                                padding: 1rem;
+                                background-color: #555;
+                                color: #aaa;
+                                line-height: 1.5rem;">
+                                The Mansaka people are skilled in various traditional crafts and have a deep connection with nature. They are masters of traditional music and dance ceremonies.
+                            </div>
+                        </div>
+                    </div>
+                    <div style="
+                        padding: 1rem;">
+                        <div style="
+                            display: flex;
+                            background-color: #555a;">
+                            <div style="
+                                width: 5rem;">
+                            </div>
+                            <div style="
+                                display: flex;
+                                flex: 1;
+                                min-width: 0;
+                                background-color: #aaa;
+                                border-radius: 1rem;">
+                                <div style="
+                                    flex: 1;
+                                    min-width: 0;">
+                                </div>
+                                <div>
+                                    <button style="
+                                        background-color: #fec;
+                                        color: #000;
+                                        border-radius: 1rem;
+                                        font-weight: bold;"
+                                        id="btnMansakaExplore">
+                                        Explore more
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div style="
@@ -357,7 +427,15 @@
         </div>
         <script src="script.js"></script>
         <script>
-
+            const btnQr = document.getElementById("btnQr");
+            const btnKaganExplore = document.getElementById("btnKaganExplore");
+            const btnMandayaExplore = document.getElementById("btnMandayaExplore");
+            const btnMansakaExplore = document.getElementById("btnMansakaExplore");
+            
+            btnQr.onclick = () => location.href = "qr.html";
+            btnKaganExplore.onclick = () => location.href = "tribes.html";
+            btnMandayaExplore.onclick = () => location.href = "tribes.html";
+            btnMansakaExplore.onclick = () => location.href = "tribes.html";
         </script>
     </body>
 </html>
