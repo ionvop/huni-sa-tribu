@@ -1,0 +1,202 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="style.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            @keyframes scan {
+                0% { top: 0%; opacity: 0.8; }
+                50% { top: 100%; opacity: 0.4; }
+                100% { top: 0%; opacity: 0.8; }
+            }
+        </style>
+    </head>
+    <body>
+        <div style="
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            box-sizing: border-box;
+            overflow: hidden;">
+            <div style="
+                display: flex;
+                background-color: #fff;">
+                <div style="
+                    display: flex;
+                    align-items: center;
+                    padding: 1rem;"
+                    id="btnBack">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#1f1f1f"><path d="m313-440 196 196q12 12 11.5 28T508-188q-12 11-28 11.5T452-188L188-452q-6-6-8.5-13t-2.5-15q0-8 2.5-15t8.5-13l264-264q11-11 27.5-11t28.5 11q12 12 12 28.5T508-715L313-520h447q17 0 28.5 11.5T800-480q0 17-11.5 28.5T760-440H313Z"/></svg>
+                </div>
+                <div style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 1rem;
+                    flex: 1;
+                    min-width: 0;
+                    color: #000;
+                    font-size: 1.5rem;">
+                    QR Code Scanner
+                </div>
+            </div>
+            <div style="
+                position: relative;
+                flex: 1;
+                min-height: 0;">
+                <div style="
+                    position: absolute;
+                    top: 0rem;
+                    left: 0rem;
+                    width: 100%;
+                    height: 100%;
+                    box-sizing: border-box;">
+                    <video style="
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;"
+                        id="vidCamera"
+                        autoplay
+                        playsinline>
+                    </video>
+                </div>
+                <div style="
+                    position: absolute;
+                    top: 0rem;
+                    left: 0rem;
+                    width: 100%;
+                    height: 100%;
+                    box-sizing: border-box;">
+                    <div style="
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        width: 60%;
+                        aspect-ratio: 1 / 1;
+                        transform: translate(-50%, -50%);
+                        box-sizing: border-box;
+                        border: 2px solid rgba(255, 255, 255, 0.4);
+                        border-radius: 12px;
+                        backdrop-filter: blur(2px);">
+                        <!-- Corner lines -->
+                        <div style="
+                            position: absolute;
+                            top: -2px;
+                            left: -2px;
+                            width: 30px;
+                            height: 30px;
+                            border-top: 4px solid #00ff7f;
+                            border-left: 4px solid #00ff7f;
+                            border-top-left-radius: 12px;">
+                        </div>
+                        <div style="
+                            position: absolute;
+                            top: -2px;
+                            right: -2px;
+                            width: 30px;
+                            height: 30px;
+                            border-top: 4px solid #00ff7f;
+                            border-right: 4px solid #00ff7f;
+                            border-top-right-radius: 12px;">
+                        </div>
+                        <div style="
+                            position: absolute;
+                            bottom: -2px;
+                            left: -2px;
+                            width: 30px;
+                            height: 30px;
+                            border-bottom: 4px solid #00ff7f;
+                            border-left: 4px solid #00ff7f;
+                            border-bottom-left-radius: 12px;">
+                        </div>
+                        <div style="
+                            position: absolute;
+                            bottom: -2px;
+                            right: -2px;
+                            width: 30px;
+                            height: 30px;
+                            border-bottom: 4px solid #00ff7f;
+                            border-right: 4px solid #00ff7f;
+                            border-bottom-right-radius: 12px;">
+                        </div>
+                        <!-- Scanning line -->
+                        <div id="scan-line" style="
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 2px;
+                            background: linear-gradient(90deg, transparent, #00ff7f, transparent);
+                            animation: scan 2s infinite;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="
+                background-color: #fff;">
+                <div style="
+                    padding: 1rem;
+                    text-align: center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#1f1f1f"><path d="M120-680q-17 0-28.5-11.5T80-720v-120q0-17 11.5-28.5T120-880h120q17 0 28.5 11.5T280-840q0 17-11.5 28.5T240-800h-80v80q0 17-11.5 28.5T120-680Zm0 600q-17 0-28.5-11.5T80-120v-120q0-17 11.5-28.5T120-280q17 0 28.5 11.5T160-240v80h80q17 0 28.5 11.5T280-120q0 17-11.5 28.5T240-80H120Zm600 0q-17 0-28.5-11.5T680-120q0-17 11.5-28.5T720-160h80v-80q0-17 11.5-28.5T840-280q17 0 28.5 11.5T880-240v120q0 17-11.5 28.5T840-80H720Zm120-600q-17 0-28.5-11.5T800-720v-80h-80q-17 0-28.5-11.5T680-840q0-17 11.5-28.5T720-880h120q17 0 28.5 11.5T880-840v120q0 17-11.5 28.5T840-680ZM700-200v-60h60v60h-60Zm0-120v-60h60v60h-60Zm-60 60v-60h60v60h-60Zm-60 60v-60h60v60h-60Zm-60-60v-60h60v60h-60Zm120-120v-60h60v60h-60Zm-60 60v-60h60v60h-60Zm-60-60v-60h60v60h-60Zm40-140q-17 0-28.5-11.5T520-560v-160q0-17 11.5-28.5T560-760h160q17 0 28.5 11.5T760-720v160q0 17-11.5 28.5T720-520H560ZM240-200q-17 0-28.5-11.5T200-240v-160q0-17 11.5-28.5T240-440h160q17 0 28.5 11.5T440-400v160q0 17-11.5 28.5T400-200H240Zm0-320q-17 0-28.5-11.5T200-560v-160q0-17 11.5-28.5T240-760h160q17 0 28.5 11.5T440-720v160q0 17-11.5 28.5T400-520H240Zm20 260h120v-120H260v120Zm0-320h120v-120H260v120Zm320 0h120v-120H580v120Z"/></svg>
+                </div>
+                <div style="
+                    padding: 1rem;
+                    padding-top: 0rem;
+                    color: #000;
+                    text-align: center;">
+                    Point your camera at a QR code
+                </div>
+                <div style="
+                    padding: 1rem;
+                    padding-top: 0rem;
+                    color: #000;
+                    text-align: center;
+                    font-size: 0.7rem;">
+                    Make sure the QR code is well-lit and centered
+                </div>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+        <script src="script.js"></script>
+        <script>
+            const btnBack = document.getElementById("btnBack");
+            const vidCamera = document.getElementById("vidCamera");
+            initialize();
+
+            async function initialize() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: "environment"
+                        }
+                    });
+
+                    vidCamera.srcObject = stream;
+                    requestAnimationFrame(scanFrame);
+                } catch (error) {
+                    alert("This page requires camera access.");
+                }
+            }
+
+            function scanFrame() {
+                let canvas = document.createElement("canvas");
+                let ctx = canvas.getContext("2d");
+
+                if (vidCamera.readyState == vidCamera.HAVE_ENOUGH_DATA) {
+                    canvas.width = vidCamera.videoWidth;
+                    canvas.height = vidCamera.videoHeight;
+                    ctx.drawImage(vidCamera, 0, 0, canvas.width, canvas.height);
+                    let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    let code = jsQR(imageData.data, imageData.width, imageData.height);
+
+                    if (code) {
+                        location.href = "result.html?qr=" + encodeURIComponent(code.data);
+                    }
+                }
+
+                requestAnimationFrame(scanFrame);
+            }
+
+            btnBack.onclick = () => location.href = "home.html";
+        </script>
+    </body>
+</html>
