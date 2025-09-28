@@ -8,7 +8,7 @@ initialize();
 function initialize() {
     g_loadData();
 
-    for (const element of document.querySelectorAll("*")) {
+    for (const element of document.body.querySelectorAll("*")) {
         element.style.setProperty("--test", "test");
         element.style.removeProperty("--test");
     }
