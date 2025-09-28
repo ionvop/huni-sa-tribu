@@ -181,7 +181,7 @@ $db = new SQLite3("database.db");
                                             $school = $visitor["school"];
 
                                             if ($school == null) {
-                                                $school = "Visitor";
+                                                $school = "N/A";
                                             }
 
                                             $date = date("m/d/y", getVisitorLastVisit($visitor) + 28800);
