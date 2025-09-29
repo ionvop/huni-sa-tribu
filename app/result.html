@@ -23,7 +23,8 @@
                 <div style="
                     display: flex;
                     align-items: center;
-                    padding: 1rem;">
+                    padding: 1rem;"
+                    id="btnBack">
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#1f1f1f"><path d="m313-440 196 196q12 12 11.5 28T508-188q-12 11-28 11.5T452-188L188-452q-6-6-8.5-13t-2.5-15q0-8 2.5-15t8.5-13l264-264q11-11 27.5-11t28.5 11q12 12 12 28.5T508-715L313-520h447q17 0 28.5 11.5T800-480q0 17-11.5 28.5T760-440H313Z"/></svg>
                 </div>
                 <div style="
@@ -39,46 +40,129 @@
                 </div>
             </div>
             <div style="
+                position: relative;
+                display: flex;
+                flex-direction: column;
                 flex: 1;
                 min-height: 0;">
+                <div style="
+                    flex: 1;
+                    min-height: 0;">
+                </div>
+                <div style="
+                    padding: 1rem;
+                    text-align: center;">
+                    <svg width="100px" height="100px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" enable-background="new 0 0 64 64"><path d="M32,2C15.431,2,2,15.432,2,32c0,16.568,13.432,30,30,30c16.568,0,30-13.432,30-30C62,15.432,48.568,2,32,2z M25.025,50l-0.02-0.02L24.988,50L11,35.6l7.029-7.164l6.977,7.184l21-21.619L53,21.199L25.025,50z" fill="#43a047"/></svg>
+                </div>
+                <div style="
+                    padding: 1rem;
+                    text-align: center;
+                    font-size: 1.5rem;
+                    color: #000;">
+                    QR Code Scanned Successfully
+                </div>
+                <div style="
+                    padding: 1rem;
+                    text-align: center;">
+                    <button id="btnReturn">
+                        Return to Home
+                    </button>
+                </div>
+                <div style="
+                    padding: 1rem;
+                    text-align: center;">
+                    <a style="
+                        text-decoration: underline;
+                        color: #000;"
+                        href="qr.html">
+                        Scan Another
+                    </a>
+                </div>
+                <div style="
+                    flex: 1;
+                    min-height: 0;">
+                </div>
+                <div style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    position: absolute;
+                    top: 0rem;
+                    left: 0rem;
+                    width: 100%;
+                    height: 100%;
+                    box-sizing: border-box;
+                    background-color: #fff;"
+                    id="panelLoader">
+                    <svg width="100px" height="100px" stroke="hsl(228, 97%, 42%)" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g><circle cx="12" cy="12" r="9.5" fill="none" stroke-width="3" stroke-linecap="round"><animate attributeName="stroke-dasharray" dur="1.5s" calcMode="spline" values="0 150;42 150;42 150;42 150" keyTimes="0;0.475;0.95;1" keySplines="0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1" repeatCount="indefinite"/><animate attributeName="stroke-dashoffset" dur="1.5s" calcMode="spline" values="0;-16;-59;-59" keyTimes="0;0.475;0.95;1" keySplines="0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1" repeatCount="indefinite"/></circle><animateTransform attributeName="transform" type="rotate" dur="2s" values="0 12 12;360 12 12" repeatCount="indefinite"/></g></svg>
+                </div>
             </div>
-            <div style="
-                padding: 1rem;
-                text-align: center;">
-                <svg width="100px" height="100px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" enable-background="new 0 0 64 64"><path d="M32,2C15.431,2,2,15.432,2,32c0,16.568,13.432,30,30,30c16.568,0,30-13.432,30-30C62,15.432,48.568,2,32,2z M25.025,50l-0.02-0.02L24.988,50L11,35.6l7.029-7.164l6.977,7.184l21-21.619L53,21.199L25.025,50z" fill="#43a047"/></svg>
-            </div>
-            <div style="
-                padding: 1rem;
-                text-align: center;
-                font-size: 1.5rem;
-                color: #000;">
-                QR Code Scanned Successfully
-            </div>
-            <div style="
-                padding: 1rem;
-                text-align: center;">
-                <button id="btnReturn">
-                    Return to Home
-                </button>
-            </div>
-            <div style="
-                padding: 1rem;
-                text-align: center;">
-                <a style="
-                    text-decoration: underline;
-                    color: #000;"
-                    href="qr.html">
-                    Scan Another
-                </a>
-            </div>
-            <div style="
-                flex: 1;
-                min-height: 0;">
-            </div>
+            
         </div>
+        <script src="config.js"></script>
         <script src="script.js"></script>
         <script>
-            
+            const btnBack = document.getElementById("btnBack");
+            const panelLoader = document.getElementById("panelLoader");
+
+            try {
+                initialize();
+            } catch (e) {
+                alert(e.message);
+                location.href = "qr.html";
+            }
+
+            async function initialize() {
+                let code = new URLSearchParams(location.search).get("qr");
+
+                if (code == "entrance") {
+                    let response = await fetch(`${g_config.baseUrl}api/visit/`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            name: g_data.name,
+                            school: g_data.school
+                        })
+                    });
+
+                    try {
+                        let data = await response.json();
+                        console.log(data);
+                    } catch (e) {
+                        console.log(e);
+                    }
+
+                    if (response.status == 409) {
+                        alert("You have already visited today.");
+                        location.href = "qr.html";
+                        return;
+                    }
+
+                    panelLoader.style.display = "none";
+                    return;
+                }
+
+                let response = await fetch(`${g_config.baseUrl}api/scan/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        name: g_data.name,
+                        school: g_data.school
+                    })
+                });
+
+                let data = await response.json();
+                console.log(data);
+                panelLoader.style.display = "none";
+                location.href = `view.html?id=${data.data.id}&tribe=${data.data.tribe}`;
+            }
+
+            btnBack.onclick = () => location.href = "home.html";
         </script>
     </body>
 </html>
