@@ -630,3 +630,10 @@ function renderContent($content, $maxHeight = 20) {
             break;
     }
 }
+
+function hasVisitorScannedToday($visitor) {
+    $lastVisit = getVisitorLastVisit($visitor);
+    $lastVisit = date("Y-m-d", $lastVisit + (8 * 60 * 60));
+    $currentDate = date("Y-m-d", time() + (8 * 60 * 60));
+    return $lastVisit == $currentDate;
+}
