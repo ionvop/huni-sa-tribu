@@ -34,11 +34,6 @@ try {
                 $stmt->bindValue(":name", $_POST["name"]);
                 $stmt->bindValue(":school", $_POST["school"]);
                 $stmt->execute();
-
-                $stmt = $db->prepare($query);
-                $stmt->bindValue(":name", $_POST["name"]);
-                $stmt->bindValue(":school", $_POST["school"]);
-                $stmt->execute();
                 
                 $query = <<<SQL
                     SELECT * FROM `visitors` WHERE `id` = :id
