@@ -78,7 +78,7 @@ try {
             $stmt->execute();
 
             $query = <<<SQL
-                SELECT FROM `content` WHERE `id` = :id
+                SELECT * FROM `content` WHERE `id` = :id
             SQL;
 
             $stmt = $db->prepare($query);
