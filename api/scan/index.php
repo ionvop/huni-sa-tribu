@@ -71,6 +71,16 @@ try {
                 $visitor = $stmt->execute()->fetchArray();
             }
 
+            if (hasVisitorScannedToday($visitor) == false) {
+                http_response_code(403);
+                
+                echo json_encode([
+                    "error" => "You have not scanned the entrance QR code yet."
+                ]);
+                
+                exit;
+            }
+
             $query = <<<SQL
                 INSERT INTO `scans` (`visitor_id`, `qr_id`)
                 VALUES (:visitor_id, :qr_id)
