@@ -1,0 +1,45 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="style.css">
+        <link rel="manifest" href="manifest.json">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            button {
+                background-color: #555;
+                color: #fff;
+                border-radius: 1rem;
+            }
+        </style>
+    </head>
+    <body>
+        <div style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            box-sizing: border-box;
+            overflow: hidden;">
+            <div style="
+                display: none;"
+                id="panelInstall">
+                <button id="btnInstall">
+                    Install
+                </button>
+            </div>
+        </div>
+        <script src="script.js"></script>
+        <script>
+            const panelInstall = document.getElementById("panelInstall");
+            const btnInstall = document.getElementById("btnInstall");
+            if ("serviceWorker" in navigator) navigator.serviceWorker.register("service-worker.js");
+            let deferredInstall;
+
+            window.addEventListener("beforeinstallprompt", (event) => {
+                event.preventDefault();
+                deferredInstall = event;
+                panelInstall.style.display = "block";
+                panelInstall.onclick = () => deferredInstall.prompt();
+            });
+        </script>
+    </body>
+</html>
