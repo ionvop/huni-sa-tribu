@@ -1,0 +1,298 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="style.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+
+        </style>
+    </head>
+    <body>
+        <div style="
+            height: 100%;
+            box-sizing: border-box;
+            overflow: hidden;">
+            <div style="
+                height: 100%;
+                box-sizing: border-box;
+                overflow: auto;">
+                <div style="
+                    background-image: linear-gradient(to bottom, #0005, #000a), url('assets/kagan_main.jpg');
+                    background-size: cover;
+                    border-bottom: 1px solid #aaa;"
+                    id="panelHeader">
+                    <div style="
+                        display: flex;">
+                        <div style="
+                            padding: 1rem;">
+                            <div style="
+                                padding: 1rem;
+                                background-color: #0005;
+                                border-radius: 50%;"
+                                id="btnBack">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="m313-440 196 196q12 12 11.5 28T508-188q-12 11-28 11.5T452-188L188-452q-6-6-8.5-13t-2.5-15q0-8 2.5-15t8.5-13l264-264q11-11 27.5-11t28.5 11q12 12 12 28.5T508-715L313-520h447q17 0 28.5 11.5T800-480q0 17-11.5 28.5T760-440H313Z"/></svg>
+                            </div>
+                        </div>
+                        <div style="
+                            flex: 1;
+                            min-width: 0;">
+                        </div>
+                    </div>
+                    <div style="
+                        padding: 1rem;
+                        padding-top: 5rem;
+                        font-size: 2rem;
+                        font-weight: bold;"
+                        id="panelTitle">
+                    </div>
+                    <div style="
+                        padding: 1rem;">
+                        <a style="
+                            text-decoration: underline;"
+                            href="learn.html"
+                            id="btnLearn">
+                            Learn more
+                        </a>
+                    </div>
+                </div>
+                <div style="
+                    display: flex;
+                    padding-left: 1rem;"
+                    id="panelDetails">
+                </div>
+                <div style="
+                    display: flex;">
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        padding: 1rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#eeddbb"><path d="m335-310 202-58q20-6 34.5-20.5T592-423l58-202q3-11-5.5-19.5T625-650l-202 58q-20 6-34.5 20.5T368-537l-58 202q-3 11 5.5 19.5T335-310Zm145-110q-25 0-42.5-17.5T420-480q0-25 17.5-42.5T480-540q25 0 42.5 17.5T540-480q0 25-17.5 42.5T480-420Zm0 340q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z"/></svg>
+                    </div>
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        flex: 1;
+                        min-width: 0;
+                        padding: 1rem;
+                        padding-left: 0rem;
+                        font-weight: bold;
+                        letter-spacing: 1px;
+                        color: #edb;">
+                        EXPLORE CATEGORIES
+                    </div>
+                </div>
+                <div id="panelCategories">
+
+                </div>
+            </div>
+        </div>
+    </body>
+    <script src="script.js"></script>
+    <script>
+        const panelHeader = document.getElementById("panelHeader");
+        const btnBack = document.getElementById("btnBack");
+        const panelTitle = document.getElementById("panelTitle");
+        const btnLearn = document.getElementById("btnLearn");
+        const panelDetails = document.getElementById("panelDetails");
+        const panelCategories = document.getElementById("panelCategories");
+        initialize();
+
+        function initialize() {
+            let tribe = new URL(location).searchParams.get("tribe");
+
+            const tribeMap = {
+                kagan: {
+                    image: "kagan_main.jpg",
+                    title: "KAGAN",
+                    origin: /*html*/`
+                        Bukidnon,<br>
+                        Misamis Oriental
+                    `,
+                    population: "~50,000",
+                    language: "Kagan",
+                    gradient: "#865, #642",
+                    color: "#edb"
+                },
+                mansaka: {
+                    image: "mansaka.jpg",
+                    title: "MANSAKA",
+                    origin: /*html*/`
+                        Davao de Oro,<br>
+                        Compostela Valley
+                    `,
+                    population: "~60,000",
+                    language: "Mansaka",
+                    gradient: "#a9d, #95b",
+                    color: "#cae"
+                },
+                mandaya: {
+                    image: "mandaya.jpg",
+                    title: "MANDAYA",
+                    origin: /*html*/`
+                        Davao Oriental,<br>
+                        Caraga Region
+                    `,
+                    population: "~40,000",
+                    language: "Mandaya",
+                    gradient: "#8c7, #7b6",
+                    color: "#8c7"
+                },
+            }
+
+            panelHeader.style.backgroundImage = `linear-gradient(to bottom, #0005, #000a), url('assets/${tribeMap[tribe].image}')`;
+            panelTitle.textContent = tribeMap[tribe].title;
+            btnLearn.href = `learn.html?tribe=${tribe}`;
+
+            panelDetails.innerHTML += renderDetail({
+                icon: /*html*/`
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M480-107q-14 0-28-5t-25-15q-65-60-115-117t-83.5-110.5q-33.5-53.5-51-103T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 45-17.5 94.5t-51 103Q698-301 648-244T533-127q-11 10-25 15t-28 5Zm0-373q33 0 56.5-23.5T560-560q0-33-23.5-56.5T480-640q-33 0-56.5 23.5T400-560q0 33 23.5 56.5T480-480Z"/></svg>
+                `,
+                label: "ORIGIN",
+                value: tribeMap[tribe].origin,
+                color: tribeMap[tribe].color
+            });
+
+            panelDetails.innerHTML += renderDetail({
+                icon: /*html*/`
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M40-240q-17 0-28.5-11.5T0-280v-23q0-43 44-70t116-27q13 0 25 .5t23 2.5q-14 21-21 44t-7 48v65H40Zm240 0q-17 0-28.5-11.5T240-280v-25q0-32 17.5-58.5T307-410q32-20 76.5-30t96.5-10q53 0 97.5 10t76.5 30q32 20 49 46.5t17 58.5v25q0 17-11.5 28.5T680-240H280Zm500 0v-65q0-26-6.5-49T754-397q11-2 22.5-2.5t23.5-.5q72 0 116 26.5t44 70.5v23q0 17-11.5 28.5T920-240H780ZM160-440q-33 0-56.5-23.5T80-520q0-34 23.5-57t56.5-23q34 0 57 23t23 57q0 33-23 56.5T160-440Zm640 0q-33 0-56.5-23.5T720-520q0-34 23.5-57t56.5-23q34 0 57 23t23 57q0 33-23 56.5T800-440Zm-320-40q-50 0-85-35t-35-85q0-51 35-85.5t85-34.5q51 0 85.5 34.5T600-600q0 50-34.5 85T480-480Z"/></svg>
+                `,
+                label: "POPULATION",
+                value: tribeMap[tribe].population,
+                color: tribeMap[tribe].color
+            });
+
+            panelDetails.innerHTML += renderDetail({
+                icon: /*html*/`
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 31.5-155.5t86-127Q252-817 325-848.5T480-880q83 0 155.5 31.5t127 86q54.5 54.5 86 127T880-480q0 82-31.5 155t-86 127.5q-54.5 54.5-127 86T480-80Zm0-82q26-36 45-75t31-83H404q12 44 31 83t45 75Zm-104-16q-18-33-31.5-68.5T322-320H204q29 50 72.5 87t99.5 55Zm208 0q56-18 99.5-55t72.5-87H638q-9 38-22.5 73.5T584-178ZM170-400h136q-3-20-4.5-39.5T300-480q0-21 1.5-40.5T306-560H170q-5 20-7.5 39.5T160-480q0 21 2.5 40.5T170-400Zm216 0h188q3-20 4.5-39.5T580-480q0-21-1.5-40.5T574-560H386q-3 20-4.5 39.5T380-480q0 21 1.5 40.5T386-400Zm268 0h136q5-20 7.5-39.5T800-480q0-21-2.5-40.5T790-560H654q3 20 4.5 39.5T660-480q0 21-1.5 40.5T654-400Zm-16-240h118q-29-50-72.5-87T584-782q18 33 31.5 68.5T638-640Zm-234 0h152q-12-44-31-83t-45-75q-26 36-45 75t-31 83Zm-200 0h118q9-38 22.5-73.5T376-782q-56 18-99.5 55T204-640Z"/></svg>
+                `,
+                label: "LANGUAGE",
+                value: tribeMap[tribe].language,
+                color: tribeMap[tribe].color
+            });
+
+            panelCategories.innerHTML += renderCategory({
+                id: "btnMusic",
+                icon: /*html*/`
+                    <svg xmlns="http://www.w3.org/2000/svg" height="36px" viewBox="0 -960 960 960" width="36px" fill="#e3e3e3"><path d="M400-120q-66 0-113-47t-47-113q0-66 47-113t113-47q23 0 42.5 5.5T480-418v-382q0-17 11.5-28.5T520-840h160q17 0 28.5 11.5T720-800v80q0 17-11.5 28.5T680-680H560v400q0 66-47 113t-113 47Z"/></svg>
+                `,
+                name: "MUSIC",
+                gradient: tribeMap[tribe].gradient
+            });
+
+            panelCategories.innerHTML += renderCategory({
+                id: "btnVideos",
+                icon: /*html*/`
+                    <svg xmlns="http://www.w3.org/2000/svg" height="36px" viewBox="0 -960 960 960" width="36px" fill="#e3e3e3"><path d="m426-330 195-125q14-9 14-25t-14-25L426-630q-15-10-30.5-1.5T380-605v250q0 18 15.5 26.5T426-330Zm54 250q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z"/></svg>
+                `,
+                name: "VIDEOS",
+                gradient: tribeMap[tribe].gradient
+            });
+
+            panelCategories.innerHTML += renderCategory({
+                id: "btnArtifacts",
+                icon: /*html*/`
+                    <svg xmlns="http://www.w3.org/2000/svg" height="36px" viewBox="0 -960 960 960" width="36px" fill="#e3e3e3"><path d="M80-80v-80h80v-360h-26q-23 0-38.5-16T80-575q0-12 5.5-22t15.5-17l333-234q11-8 22.5-11.5T480-863q12 0 23.5 3.5T526-848l333 234q10 7 15.5 17.5T880-574q0 23-15.5 38.5T826-520h-26v360h80v80H80Zm280-160q17 0 28.5-11.5T400-280v-120l47 70q6 9 14.5 13.5T480-312q10 0 18.5-4.5T513-330l47-70v120q0 17 11.5 28.5T600-240q17 0 28.5-11.5T640-280v-207q0-14-9.5-23.5T607-520h-29q-8 0-15.5 4T550-505l-70 105-68-102q-5-8-14-13t-19-5h-19q-17 0-28.5 11.5T320-480v200q0 17 11.5 28.5T360-240Z"/></svg>
+                `,
+                name: "ARTIFACTS",
+                gradient: tribeMap[tribe].gradient
+            });
+
+            panelCategories.innerHTML += renderCategory({
+                id: "btnEvents",
+                icon: /*html*/`
+                    <svg xmlns="http://www.w3.org/2000/svg" height="36px" viewBox="0 -960 960 960" width="36px" fill="#e3e3e3"><path d="M80-80v-80h80v-360h-26q-23 0-38.5-16T80-575q0-12 5.5-22t15.5-17l333-234q11-8 22.5-11.5T480-863q12 0 23.5 3.5T526-848l333 234q10 7 15.5 17.5T880-574q0 23-15.5 38.5T826-520h-26v360h80v80H80Zm280-160q17 0 28.5-11.5T400-280v-120l47 70q6 9 14.5 13.5T480-312q10 0 18.5-4.5T513-330l47-70v120q0 17 11.5 28.5T600-240q17 0 28.5-11.5T640-280v-207q0-14-9.5-23.5T607-520h-29q-8 0-15.5 4T550-505l-70 105-68-102q-5-8-14-13t-19-5h-19q-17 0-28.5 11.5T320-480v200q0 17 11.5 28.5T360-240Z"/></svg>
+                `,
+                name: "EVENTS",
+                gradient: tribeMap[tribe].gradient
+            });
+
+            const btnMusic = document.getElementById("btnMusic");
+            const btnVideos = document.getElementById("btnVideos");
+            const btnArtifacts = document.getElementById("btnArtifacts");
+            const btnEvents = document.getElementById("btnEvents");
+
+            btnMusic.onclick = () => location.href = `list.html?tribe=${tribe}&category=music`;
+            btnVideos.onclick = () => location.href = `list.html?tribe=${tribe}&category=video`;
+            btnArtifacts.onclick = () => location.href = `list.html?tribe=${tribe}&category=artifact`;
+            btnEvents.onclick = () => location.href = `list.html?tribe=${tribe}&category=event`;
+        }
+
+        function renderDetail(detail) {
+            return /*html*/`
+                <div style="
+                    flex: 1;
+                    min-width: 0;
+                    padding: 1rem;
+                    padding-left: 0rem;">
+                    <div style="
+                        background-color: #333;
+                        border: 1px solid ${detail.color};
+                        border-radius: 1rem;
+                        height: 100%;
+                        box-sizing: border-box;">
+                        <div style="
+                            display: flex;
+                            justify-content: center;
+                            padding: 1rem;">
+                            <div style="
+                                padding: 1rem;
+                                background-color: #555;
+                                border-radius: 1rem;">
+                                ${detail.icon}
+                            </div>
+                        </div>
+                        <div style="
+                            padding: 1rem;
+                            padding-top: 0rem;
+                            font-size: 0.7rem;
+                            color: ${detail.color};
+                            text-align: center;">
+                            ${detail.label}
+                        </div>
+                        <div style="
+                            padding: 1rem;
+                            padding-top: 0rem;
+                            font-size: 0.7rem;
+                            text-align: center;">
+                            ${detail.value}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCategory(category) {
+            return /*html*/`
+                <div style="
+                    padding: 1rem;">
+                    <div style="
+                        display: flex;
+                        border-radius: 1rem;
+                        overflow: hidden;"
+                        id="${category.id}">
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            padding: 3rem;
+                            background-image: linear-gradient(to bottom right, ${category.gradient});">
+                            ${category.icon}
+                        </div>
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            flex: 1;
+                            min-width: 0;
+                            padding: 3rem;
+                            font-size: 1.5rem;
+                            font-weight: bold;
+                            background-image: linear-gradient(to bottom right, ${category.gradient});">
+                            ${category.name}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        btnBack.onclick = () => location.href = "tribes.html";
+    </script>
+</html>
