@@ -1,0 +1,148 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="style.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            button {
+                background-color: #554;
+                color: #fed;
+                border-radius: 2rem;
+                border: 1px solid #fed;
+            }
+        </style>
+    </head>
+    <body>
+        <div style="
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            box-sizing: border-box;
+            overflow: hidden;">
+            <div style="
+                flex: 1;
+                min-height: 0;
+                overflow: auto;">
+                <div style="
+                    padding: 1rem;">
+                    <div style="
+                        border: 1px solid #aaa;
+                        border-radius: 1rem;">
+                        <div style="
+                            padding: 1rem;
+                            font-size: 1.5rem;">
+                            INDIGENOUS TRIBES
+                        </div>
+                        <div style="
+                            padding: 1rem;
+                            padding-top: 0rem;
+                            font-size: 1rem;
+                            color: #aaa">
+                            Explore Cultural Heritage
+                        </div>
+                    </div>
+                </div>
+                <div id="panelTribes">
+                </div>
+            </div>
+            <div id="mountNavigation">
+            </div>
+        </div>
+        <script src="script.js"></script>
+        <script>
+            const mountTribes = document.getElementById("mountTribes");
+            const panelTribes = document.getElementById("panelTribes");
+            initialize();
+
+            function initialize() {
+                mountNavigation.insertAdjacentHTML("afterend", g_renderNavigation("tribes"));
+                mountNavigation.remove();
+
+                panelTribes.innerHTML += renderTribe({
+                    name: "KAGAN",
+                    image: "ata_manobo_main.jpg",
+                    description: "Known for their rich oral tradition and intricate beadwork",
+                    label: "kagan"
+                });
+
+                panelTribes.innerHTML += renderTribe({
+                    name: "MANSAKA",
+                    image: "mansaka_main.jpg",
+                    description: "Renowned for their traditional weaving and agricultural practices",
+                    label: "mansaka"
+                });
+
+                panelTribes.innerHTML += renderTribe({
+                    name: "MANDAYA",
+                    image: "mandaya_main.jpg",
+                    description: "Masters of traditional music and dance ceremonies",
+                    label: "mandaya"
+                });
+            }
+
+            function renderTribe(tribe) {
+                return /*html*/`
+                    <div style="
+                        padding: 1rem;">
+                        <div style="
+                            display: flex;
+                            border-radius: 1rem;
+                            overflow: hidden;">
+                            <div style="
+                                flex: 1;
+                                min-width: 0;">
+                                <img style="
+                                    width: 100%;
+                                    height: 100%;
+                                    object-fit: cover;"
+                                    src="assets/${tribe.image}">
+                            </div>
+                            <div style="
+                                flex: 2;
+                                min-width: 0;
+                                background-image: linear-gradient(to right, #654, #764);">
+                                <div style="
+                                    padding: 1rem;
+                                    font-weight: bold;
+                                    font-size: 1.5rem;">
+                                    ${tribe.name}
+                                </div>
+                                <div style="
+                                    padding: 1rem;
+                                    padding-top: 0rem;">
+                                    <div style="
+                                        width: 3rem;
+                                        height: 3px;
+                                        background-color: #edb;">
+                                    </div>
+                                </div>
+                                <div style="
+                                    padding: 1rem;
+                                    padding-top: 0rem;
+                                    color: #aaa;
+                                    line-height: 1.5rem;">
+                                    ${tribe.description}
+                                </div>
+                                <div style="
+                                    padding: 1rem;
+                                    padding-top: 0rem;
+                                    color: #edb;">
+                                    4 categories
+                                </div>
+                                <div style="
+                                    padding: 1rem;
+                                    padding-top: 0rem;
+                                    text-align: right;">
+                                    <a href="categories.html?tribe=${tribe.label}">
+                                        <button>
+                                            CLICK HERE
+                                        </button>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        </script>
+    </body>
+</html>
