@@ -1,0 +1,131 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="style.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            
+        </style>
+    </head>
+    <body>
+        <div style="
+            display: flex;
+            flex-direction: column;
+            background-image: linear-gradient(to bottom, #222, #000);
+            height: 100%;
+            box-sizing: border-box;
+            overflow: hidden;">
+            <div style="
+                display: flex;">
+                <div style="
+                    display: flex;
+                    align-items: center;
+                    padding: 1rem;">
+                    <div style="
+                        padding: 1rem;
+                        background-color: #0005;
+                        border-radius: 50%;"
+                        id="btnBack">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="m313-440 196 196q12 12 11.5 28T508-188q-12 11-28 11.5T452-188L188-452q-6-6-8.5-13t-2.5-15q0-8 2.5-15t8.5-13l264-264q11-11 27.5-11t28.5 11q12 12 12 28.5T508-715L313-520h447q17 0 28.5 11.5T800-480q0 17-11.5 28.5T760-440H313Z"/></svg>
+                    </div>
+                </div>
+                <div style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex: 1;
+                    min-width: 0;
+                    font-size: 1.5rem;
+                    font-weight: bold;"
+                    id="panelTribe">
+                </div>
+            </div>
+            <div style="
+                flex: 1;
+                min-height: 0;
+                overflow: auto;">
+                <div style="
+                    padding: 1rem;
+                    border-bottom: 1px solid #aaa;"
+                    id="panelContent">
+                </div>
+                <div style="
+                    padding: 1rem;
+                    font-size: 1.5rem;
+                    font-weight: bold;
+                    border-bottom: 1px solid #aaa;"
+                    id="panelTitle">
+                </div>
+                <div style="
+                    padding: 1rem;"
+                    id="panelDescription">
+                </div>
+            </div>
+        </div>
+        <script src="config.js"></script>
+        <script src="script.js"></script>
+        <script>
+            const btnBack = document.getElementById("btnBack");
+            const panelTribe = document.getElementById("panelTribe");
+            const panelContent = document.getElementById("panelContent");
+            const panelTitle = document.getElementById("panelTitle");
+            const panelDescription = document.getElementById("panelDescription");
+            initialize();
+
+            async function initialize() {
+                let id = new URLSearchParams(window.location.search).get("id");
+                let tribe = new URLSearchParams(window.location.search).get("tribe");
+
+                const tribeMap = {
+                    kagan: "KAGAN",
+                    mansaka: "MANSAKA",
+                    mandaya: "MANDAYA"
+                };
+
+                panelTribe.textContent = tribeMap[tribe];
+                let response = await fetch(`${g_config.baseUrl}api/content/?id=${id}`);
+                let data = await response.json();
+                console.log(data);
+                let content = data.data;
+
+                let ext = content.file.split('.').pop().toLowerCase();
+
+                if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+                    panelContent.innerHTML = /*html*/`
+                        <img style="
+                            width: 100%;
+                            height: 10rem;
+                            object-fit: contain;"
+                            src="${g_config.baseUrl}uploads/${content.file}">
+                    `;
+                } else if (['mp4', 'webm', 'ogg'].includes(ext)) {
+                    panelContent.innerHTML = /*html*/`
+                        <video style="
+                            width: 100%;
+                            height: 10rem;
+                            object-fit: contain;"
+                            src="${g_config.baseUrl}uploads/${content.file}"
+                            controls>
+                        </video>
+                    `;
+                } else if (['mp3', 'wav', 'ogg'].includes(ext)) {
+                    panelContent.innerHTML = /*html*/`
+                        <audio style="
+                            width: 100%;"
+                            src="${g_config.baseUrl}uploads/${content.file}"
+                            controls>
+                        </audio>
+                    `;
+                } else {
+                    panelContent.innerHTML = /*html*/`
+                        Unsupported file
+                    `;
+                }
+
+                panelTitle.textContent = content.title;
+                panelDescription.textContent = content.description;
+            }
+
+            btnBack.onclick = () => history.back();
+        </script>
+    </body>
+</html>
