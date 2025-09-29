@@ -13,6 +13,10 @@ try {
         case "POST":
             $_POST = json_decode(file_get_contents("php://input"), true);
 
+            if ($_POST["school"] == null) {
+                $_POST["school"] = "";
+            }
+
             $query = <<<SQL
                 SELECT * FROM `qr` WHERE `code` = :code
             SQL;
