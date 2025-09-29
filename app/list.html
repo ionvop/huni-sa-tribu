@@ -1,0 +1,173 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="style.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            input {
+                background-color: transparent;
+                color: #fff;
+            }
+
+            input:focus {
+                outline: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div style="
+            display: flex;
+            flex-direction: column;
+            background-image: linear-gradient(to bottom, #222, #000);
+            height: 100%;
+            box-sizing: border-box;
+            overflow: hidden;">
+            <div style="
+                display: flex;">
+                <div style="
+                    display: flex;
+                    align-items: center;
+                    padding: 1rem;">
+                    <div style="
+                        padding: 1rem;
+                        background-color: #0005;
+                        border-radius: 50%;"
+                        id="btnBack">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="m313-440 196 196q12 12 11.5 28T508-188q-12 11-28 11.5T452-188L188-452q-6-6-8.5-13t-2.5-15q0-8 2.5-15t8.5-13l264-264q11-11 27.5-11t28.5 11q12 12 12 28.5T508-715L313-520h447q17 0 28.5 11.5T800-480q0 17-11.5 28.5T760-440H313Z"/></svg>
+                    </div>
+                </div>
+                <div style="
+                    display: flex;
+                    align-items: center;
+                    padding: 1rem;
+                    padding-left: 0rem;
+                    flex: 1;
+                    min-width: 0;">
+                    <div style="
+                        display: flex;
+                        background-color: #333;
+                        border-radius: 2rem;">
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            padding: 1rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M380-320q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l224 224q11 11 11 28t-11 28q-11 11-28 11t-28-11L532-372q-30 24-69 38t-83 14Zm0-80q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>
+                        </div>
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            padding: 1rem;
+                            padding-left: 0rem;">
+                            <input style="
+                                padding: 0rem;"
+                                id="inputSearch"
+                                placeholder="Search">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="
+                flex: 1;
+                min-height: 0;
+                overflow: auto;"
+                id="panelList">
+            </div>
+        </div>
+        <script src="config.js"></script>
+        <script src="script.js"></script>
+        <script>
+            const btnBack = document.getElementById("btnBack");
+            const inputSearch = document.getElementById("inputSearch");
+            const panelList = document.getElementById("panelList");
+            let list;
+            initialize();
+
+            async function initialize() {
+                let tribe = new URLSearchParams(window.location.search).get("tribe");
+                let category = new URLSearchParams(window.location.search).get("category");
+                btnBack.onclick = () => location.href = `categories.html?tribe=${tribe}`;
+
+                const tribeMap = {
+                    kagan: {
+                        color: "#da7"
+                    },
+                    mansaka: {
+                        color: "#cae"
+                    },
+                    mandaya: {
+                        color: "#8c7"
+                    }
+                };
+
+                document.documentElement.style.setProperty("--color", tribeMap[tribe].color);
+                let response = await fetch(`${g_config.baseUrl}api/content/?tribe=${tribe}&category=${category}`);
+                let data = await response.json();
+                list = data.data;
+                console.log(data);
+                renderList();
+            }
+
+            function renderList() {
+                panelList.innerHTML = "";
+
+                for (let content of list) {
+                    if (inputSearch.value && !content.title.toLowerCase().includes(inputSearch.value.toLowerCase()) && !content.description.toLowerCase().includes(inputSearch.value.toLowerCase())) continue;
+
+                    panelList.innerHTML += /*html*/`
+                        <div style="
+                            padding: 1rem;">
+                            <div style="
+                                display: flex;
+                                background-color: #333;
+                                border: 1px solid var(--color);
+                                border-radius: 1rem;">
+                                <div style="
+                                    flex: 1;
+                                    min-width: 0;">
+                                    <div style="
+                                        padding: 1rem;
+                                        color: var(--color);
+                                        font-weight: bold;">
+                                        ${g_escapeHtml(content.title)}
+                                    </div>
+                                    <div style="
+                                        padding: 1rem;
+                                        padding-top: 0rem;">
+                                        <div style="
+                                            display: -webkit-box;
+                                            -webkit-line-clamp: 3;
+                                            -webkit-box-orient: vertical;
+                                            overflow: hidden;
+                                            text-overflow: ellipsis;
+                                            word-break: break-all;
+                                            color: #aaa;">
+                                            ${g_escapeHtml(content.description)}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="
+                                    display: flex;
+                                    align-items: center;
+                                    padding: 1rem;">
+                                    <div style="
+                                        padding: 0.5rem;
+                                        border-radius: 50%;
+                                        background-color: var(--color);"
+                                        onclick="openContent(${content.id})">
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#1f1f1f"><path d="M320-273v-414q0-17 12-28.5t28-11.5q5 0 10.5 1.5T381-721l326 207q9 6 13.5 15t4.5 19q0 10-4.5 19T707-446L381-239q-5 3-10.5 4.5T360-233q-16 0-28-11.5T320-273Z"/></svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            function openContent(id) {
+                let tribe = new URLSearchParams(window.location.search).get("tribe");
+                location.href = `view.html?id=${id}&tribe=${tribe}`;
+            }
+
+            inputSearch.onchange = () => renderList();
+        </script>
+    </body>
+</html>
