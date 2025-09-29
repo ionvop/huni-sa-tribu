@@ -180,11 +180,11 @@ $db = new SQLite3("database.db");
                                         while ($visitor = $result->fetchArray()) {
                                             $school = $visitor["school"];
 
-                                            if ($school == null) {
+                                            if ($school == "") {
                                                 $school = "N/A";
                                             }
 
-                                            $date = date("m/d/y", getVisitorLastVisit($visitor) + 28800);
+                                            $date = date("m/d/y", $visitor["time"] + 28800);
                                             $contentViews = getVisitorContentViews($visitor);
                                             $returningVisitor = getVisitorVisitCount($visitor) > 1 ? "Yes" : "No";
                                             $engagement = getVisitorEngagement($visitor);
