@@ -496,8 +496,12 @@ function getLeastScanned() {
     $db = new SQLite3("database.db");
 
     $query = <<<SQL
-        SELECT COUNT(*) AS `count`, `qr_id` FROM `scans`
-        GROUP BY `qr_id` ORDER BY `count`
+        SELECT `qr`.`id`, COUNT(`scans`.`qr_id`) AS `count`
+        FROM `qr`
+        LEFT JOIN `scans` ON `qr`.`id` = `scans`.`qr_id`
+        GROUP BY `qr`.`id`
+        ORDER BY `count` ASC
+        LIMIT 1
     SQL;
 
     $result = $db->query($query);
@@ -512,7 +516,7 @@ function getLeastScanned() {
     SQL;
 
     $stmt = $db->prepare($query);
-    $stmt->bindValue(":id", $qrId["qr_id"]);
+    $stmt->bindValue(":id", $qrId["id"]);
     $qr = $stmt->execute()->fetchArray();
 
     $query = <<<SQL
