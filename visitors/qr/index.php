@@ -80,7 +80,7 @@ $db = new SQLite3("database.db");
                     <?=renderVisitorTabs("qr")?>
                     <div style="
                         display: grid;
-                        grid-template-columns: repeat(2, 1fr);
+                        grid-template-columns: repeat(3, 1fr);
                         border: 1px solid #fff5">
                         <div style="
                             padding: 1rem;">
@@ -107,6 +107,42 @@ $db = new SQLite3("database.db");
                                     font-size: 2rem;
                                     font-weight: bold;">
                                     <?=getTotalScans()?>
+                                </div>
+                                <div></div>
+                            </div>
+                        </div>
+                        <div style="
+                            padding: 1rem;">
+                            <div style="
+                                display: grid;
+                                grid-template-rows: 1fr repeat(3, max-content) 1fr;
+                                padding: 3rem;
+                                height: 100%;
+                                box-sizing: border-box;
+                                background-image: linear-gradient(to bottom, #555a, #5555);
+                                border-radius: 1rem;">
+                                <div></div>
+                                <div style="
+                                    padding: 1rem;
+                                    text-align: center;
+                                    font-size: 1.5rem;
+                                    font-weight: bold;">
+                                    Least Scanned
+                                </div>
+                                <div style="
+                                    padding: 1rem;
+                                    text-align: center;
+                                    font-size: 2rem;
+                                    font-weight: bold;">
+                                    <?=getLeastScanned()["title"] ?? "none"?>
+                                </div>
+                                <div style="
+                                    padding: 1rem;
+                                    padding-top: 0rem;
+                                    text-align: center;
+                                    font-size: 1.5rem;
+                                    font-weight: bold;">
+                                    <?=getScanCount(getLeastScanned())?> total scans
                                 </div>
                                 <div></div>
                             </div>
