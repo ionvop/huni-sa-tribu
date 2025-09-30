@@ -492,6 +492,38 @@ function getMostScanned() {
     return $stmt->execute()->fetchArray();
 }
 
+function getLeastScanned() {
+    $db = new SQLite3("database.db");
+
+    $query = <<<SQL
+        SELECT COUNT(*) AS `count`, `qr_id` FROM `scans`
+        GROUP BY `qr_id` ORDER BY `count`
+    SQL;
+
+    $result = $db->query($query);
+    $qrId = $result->fetchArray();
+
+    if ($qrId == false) {
+        return false;
+    }
+    
+    $query = <<<SQL
+        SELECT * FROM `qr` WHERE `id` = :id
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":id", $qrId["qr_id"]);
+    $qr = $stmt->execute()->fetchArray();
+
+    $query = <<<SQL
+        SELECT * FROM `content` WHERE `id` = :id
+    SQL;
+
+    $stmt = $db->prepare($query);
+    $stmt->bindValue(":id", $qr["content_id"]);
+    return $stmt->execute()->fetchArray();
+}
+
 function getScanCount($content) {
     $db = new SQLite3("database.db");
 
