@@ -24,6 +24,7 @@ $analytics = aggregateData($data, time());
 $query = <<<SQL
     SELECT COUNT(*) AS `count`, `visitors`.`school` AS `school` FROM `visits`
     LEFT JOIN `visitors` ON `visits`.`visitor_id` = `visitors`.`id`
+    WHERE `visitors`.`school` <> ''
     GROUP BY `school`
     ORDER BY `count` DESC
 SQL;
