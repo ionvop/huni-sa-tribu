@@ -68,7 +68,7 @@ require_once "common.php";
                     display: block;
                     padding: 1rem;"
                     href="content/">
-                    BACK TO HOME
+                    BACK
                 </a>
                 <div></div>
             </div>
