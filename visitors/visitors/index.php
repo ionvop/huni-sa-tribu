@@ -133,11 +133,35 @@ $db = new SQLite3("database.db");
                 <div style="
                     background-image: linear-gradient(to bottom, #020, #000);">
                     <div style="
-                        padding: 1rem;
-                        font-size: 1.5rem;
-                        font-weight: bold;
-                        text-align: center;">
-                        Detailed Visitor Engagement
+                        display: grid;
+                        grid-template-columns: 1fr max-content">
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            padding: 1rem;
+                            font-size: 1.5rem;
+                            font-weight: bold;
+                            text-align: center;">
+                            Detailed Visitor Engagement
+                        </div>
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            padding: 1rem;">
+                            <select style="
+                                border-radius: 1rem;"
+                                id="selectSort">
+                                <option value="">
+                                    Sort
+                                </option>
+                                <option value="school">
+                                    School
+                                </option>
+                                <option value="engagement">
+                                    Engagement
+                                </option>
+                            </select>
+                        </div>
                     </div>
                     <div style="
                         padding: 5rem;
@@ -169,7 +193,7 @@ $db = new SQLite3("database.db");
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="tbody">
                                     <?php
                                         $query = <<<SQL
                                             SELECT * FROM `visitors`
@@ -223,7 +247,64 @@ $db = new SQLite3("database.db");
         </div>
         <script src="script.js"></script>
         <script>
-            
+            const selectSort = document.getElementById("selectSort");
+            const tbody = document.getElementById("tbody");
+            let tbodyOriginalHtml = tbody.innerHTML;
+            initialize();
+
+            function initialize() {
+
+            }
+
+            function sortTableRows(tbody, columnIndex, compareFn) {
+                // Convert the rows NodeList to an array so we can sort it
+                const rows = Array.from(tbody.querySelectorAll("tr"));
+
+                // Sort using the provided comparator function
+                rows.sort((a, b) => {
+                    const aText = a.children[columnIndex].textContent.trim();
+                    const bText = b.children[columnIndex].textContent.trim();
+                    return compareFn(aText, bText);
+                });
+
+                // Append rows in new order
+                rows.forEach(row => tbody.appendChild(row));
+            }
+
+            selectSort.onchange = () => {
+                switch (selectSort.value) {
+                    case "": {
+                        tbody.innerHTML = tbodyOriginalHtml;
+                    } break;
+                    case "school": {
+                        sortTableRows(tbody, 1, (a, b) => a.localeCompare(b));
+                        sortTableRows(tbody, 1, compareAlphabeticallyWithNA);
+                    } break;
+                    case "engagement": {
+                        sortTableRows(tbody, 5, (a, b) => {
+                            a.replace("%", "");
+                            b.replace("%", "");
+                            return parseFloat(b) - parseFloat(a);
+                        });
+                    } break;
+                }
+            }
+
+            function compareAlphabeticallyWithNA(a, b) {
+                const A = a.trim().toLowerCase();
+                const B = b.trim().toLowerCase();
+
+                // Handle "N/A" cases first
+                const isANA = A === "n/a";
+                const isBNA = B === "n/a";
+
+                if (isANA && isBNA) return 0;      // both are "N/A" → equal
+                if (isANA) return 1;              // "N/A" goes last → push down
+                if (isBNA) return -1;             // "N/A" goes last → push up the other
+
+                // Otherwise, normal alphabetical comparison
+                return A.localeCompare(B);
+            }
         </script>
     </body>
 </html>
