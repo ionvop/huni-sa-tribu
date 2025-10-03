@@ -188,11 +188,26 @@ $db = new SQLite3("database.db");
                 <div style="
                     background-image: linear-gradient(to bottom, #020, #000);">
                     <div style="
-                        padding: 1rem;
-                        font-size: 1.5rem;
-                        font-weight: bold;
-                        text-align: center;">
-                        QR Code Scans Monitor
+                        display: grid;
+                        grid-template-columns: 1fr max-content;">
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            padding: 1rem;
+                            font-size: 1.5rem;
+                            font-weight: bold;
+                            text-align: center;">
+                            QR Code Scans Monitor
+                        </div>
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            padding: 1rem;">
+                            <input style="
+                                border-radius: 1rem;"
+                                id="inputSearch"
+                                placeholder="Search">
+                        </div>
                     </div>
                     <div style="
                         padding: 5rem;
@@ -201,7 +216,7 @@ $db = new SQLite3("database.db");
                             background-image: linear-gradient(to bottom, #454, #222);
                             border-radius: 1rem;
                             overflow: hidden;">
-                            <table>
+                            <table id="qrTable">
                                 <thead>
                                     <tr>
                                         <th>
@@ -292,6 +307,24 @@ $db = new SQLite3("database.db");
         </div>
         <script src="script.js"></script>
         <script>
+            const inputSearch = document.getElementById("inputSearch");
+            inputSearch.oninput = () => filterTable(inputSearch.value);
+
+            function filterTable(searchTerm) {
+                const table = document.getElementById("qrTable");
+                const tbody = table.querySelector("tbody");
+                const rows = tbody.querySelectorAll("tr");
+                
+                // Normalize the search term for case-insensitive matching
+                const term = searchTerm.trim().toLowerCase();
+
+                rows.forEach(row => {
+                    const rowText = row.textContent.toLowerCase();
+                    // Show row if it contains the term, hide if not
+                    row.style.display = rowText.includes(term) ? "" : "none";
+                });
+            }
+
 
         </script>
     </body>
