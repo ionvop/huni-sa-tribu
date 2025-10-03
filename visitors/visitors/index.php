@@ -134,7 +134,7 @@ $db = new SQLite3("database.db");
                     background-image: linear-gradient(to bottom, #020, #000);">
                     <div style="
                         display: grid;
-                        grid-template-columns: 1fr max-content">
+                        grid-template-columns: 1fr repeat(2, max-content);">
                         <div style="
                             display: flex;
                             align-items: center;
@@ -152,13 +152,22 @@ $db = new SQLite3("database.db");
                                 border-radius: 1rem;"
                                 id="selectSort">
                                 <option value="">
-                                    Sort
-                                </option>
-                                <option value="school">
-                                    School
+                                    Select Sort
                                 </option>
                                 <option value="engagement">
                                     Engagement
+                                </option>
+                            </select>
+                        </div>
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            padding: 1rem;">
+                            <select style="
+                                border-radius: 1rem;"
+                                id="selectSchools">
+                                <option value="">
+                                    Filter Schools
                                 </option>
                             </select>
                         </div>
@@ -247,13 +256,42 @@ $db = new SQLite3("database.db");
         </div>
         <script src="script.js"></script>
         <script>
+            const selectSchools = document.getElementById("selectSchools");
             const selectSort = document.getElementById("selectSort");
             const tbody = document.getElementById("tbody");
             let tbodyOriginalHtml = tbody.innerHTML;
+            const schools = [];
             initialize();
 
             function initialize() {
+                for (const tr of tbody.querySelectorAll("tr")) {
+                    const school = tr.children[1].textContent.trim();
+                    const option = document.createElement("option");
+                    option.value = school;
+                    if (schools.includes(school)) continue;
+                    schools.push(school);
+                    option.textContent = school;
+                    selectSchools.appendChild(option);
+                }
+            }
 
+            selectSchools.onchange = () => {
+                if (selectSchools.value == "") {
+                    for (const tr of tbody.querySelectorAll("tr")) {
+                        tr.style.display = "";
+                    }
+
+                    return;
+                }
+
+                for (const tr of tbody.querySelectorAll("tr")) {
+                    const school = tr.children[1].textContent.trim();
+                    if (selectSchools.value == school) {
+                        tr.style.display = "";
+                    } else {
+                        tr.style.display = "none";
+                    }
+                }
             }
 
             function sortTableRows(tbody, columnIndex, compareFn) {
@@ -275,10 +313,7 @@ $db = new SQLite3("database.db");
                 switch (selectSort.value) {
                     case "": {
                         tbody.innerHTML = tbodyOriginalHtml;
-                    } break;
-                    case "school": {
-                        sortTableRows(tbody, 1, (a, b) => a.localeCompare(b));
-                        sortTableRows(tbody, 1, compareAlphabeticallyWithNA);
+                        selectSchools.onchange();
                     } break;
                     case "engagement": {
                         sortTableRows(tbody, 5, (a, b) => {
@@ -288,22 +323,6 @@ $db = new SQLite3("database.db");
                         });
                     } break;
                 }
-            }
-
-            function compareAlphabeticallyWithNA(a, b) {
-                const A = a.trim().toLowerCase();
-                const B = b.trim().toLowerCase();
-
-                // Handle "N/A" cases first
-                const isANA = A === "n/a";
-                const isBNA = B === "n/a";
-
-                if (isANA && isBNA) return 0;      // both are "N/A" → equal
-                if (isANA) return 1;              // "N/A" goes last → push down
-                if (isBNA) return -1;             // "N/A" goes last → push up the other
-
-                // Otherwise, normal alphabetical comparison
-                return A.localeCompare(B);
             }
         </script>
     </body>
