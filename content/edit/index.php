@@ -227,7 +227,8 @@ if ($content == false) {
                                             <button style="
                                                 background-color: #000a;"
                                                 name="method"
-                                                value="generateQr">
+                                                value="generateQr"
+                                                onclick="generateQr(this)">
                                                 <div style="
                                                     display: grid;
                                                     grid-template-columns: repeat(2, max-content);">
@@ -250,7 +251,8 @@ if ($content == false) {
                                             <a href="visitors/qr/view?id={$qr['id']}">
                                                 <button style="
                                                     background-color: #000a;"
-                                                    type="button">
+                                                    type="button"
+                                                    onclick="generateQr(this)">
                                                     <div style="
                                                         display: grid;
                                                         grid-template-columns: repeat(2, max-content);">
@@ -306,7 +308,8 @@ if ($content == false) {
                                 <button style="
                                     background-color: #5c6;"
                                     name="method"
-                                    value="edit">
+                                    value="edit"
+                                    id="btnSave">
                                     <div style="
                                         display: grid;
                                         grid-template-columns: repeat(2, max-content);">
@@ -338,6 +341,13 @@ if ($content == false) {
             const panelPreview = document.getElementById("panelPreview");
             const inputFile = document.getElementById("inputFile");
             const btnArchive = document.getElementById("btnArchive");
+            const btnSave = document.getElementById("btnSave");
+
+            function generateQr(element) {
+                return confirm("Are you sure you want to generate a QR for this content?");
+            }
+
+            btnSave.onclick = () => confirm("Are you sure you want to save this content?");
 
             inputFile.onchange = (event) => {
                 let file = event.target.files[0];
