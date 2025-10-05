@@ -194,7 +194,8 @@ require_once "common.php";
                             <button style="
                                 background-color: #5c6;"
                                 name="method"
-                                value="upload">
+                                value="upload"
+                                id="btnUpload">
                                 UPLOAD
                             </button>
                         </div>
@@ -207,6 +208,7 @@ require_once "common.php";
             const panelPreview = document.getElementById("panelPreview");
             const selectCategory = document.getElementById("selectCategory");
             const inputFile = document.getElementById("inputFile");
+            const btnUpload = document.getElementById("btnUpload");
 
             selectCategory.onchange = () => {
                 switch (selectCategory.value) {
@@ -261,6 +263,8 @@ require_once "common.php";
 
                 reader.readAsDataURL(file);
             }
+
+            btnUpload.onclick = () => confirm("Are you sure you want to upload this content?");
         </script>
     </body>
 </html>
