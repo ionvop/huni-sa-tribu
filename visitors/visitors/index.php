@@ -134,7 +134,7 @@ $db = new SQLite3("database.db");
                     background-image: linear-gradient(to bottom, #020, #000);">
                     <div style="
                         display: grid;
-                        grid-template-columns: 1fr repeat(2, max-content);">
+                        grid-template-columns: 1fr repeat(3, max-content);">
                         <div style="
                             display: flex;
                             align-items: center;
@@ -143,6 +143,14 @@ $db = new SQLite3("database.db");
                             font-weight: bold;
                             text-align: center;">
                             Detailed Visitor Engagement
+                        </div>
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            padding: 1rem;
+                            color: #aaa;
+                            line-height: 1.5rem;"
+                            id="panelCount">
                         </div>
                         <div style="
                             display: flex;
@@ -258,6 +266,7 @@ $db = new SQLite3("database.db");
         <script>
             const selectSchools = document.getElementById("selectSchools");
             const selectSort = document.getElementById("selectSort");
+            const panelCount = document.getElementById("panelCount");
             const tbody = document.getElementById("tbody");
             let tbodyOriginalHtml = tbody.innerHTML;
             const schools = [];
@@ -273,6 +282,8 @@ $db = new SQLite3("database.db");
                     option.textContent = school;
                     selectSchools.appendChild(option);
                 }
+
+                updateCount();
             }
 
             selectSchools.onchange = () => {
@@ -281,6 +292,7 @@ $db = new SQLite3("database.db");
                         tr.style.display = "";
                     }
 
+                    updateCount();
                     return;
                 }
 
@@ -292,6 +304,24 @@ $db = new SQLite3("database.db");
                         tr.style.display = "none";
                     }
                 }
+
+                updateCount();
+            }
+
+            function updateCount() {
+                let visitorCount = 0;
+                let schoolCount = schools.length - 1;
+
+                for (const tr of tbody.querySelectorAll("tr")) {
+                    if (tr.style.display != "none") {
+                        visitorCount++;
+                    }
+                }
+
+                panelCount.innerHTML = /*html*/`
+                    Total Visitors: ${visitorCount}<br>
+                    Total Schools: ${schoolCount}
+                `;
             }
 
             function sortTableRows(tbody, columnIndex, compareFn) {
@@ -307,6 +337,7 @@ $db = new SQLite3("database.db");
 
                 // Append rows in new order
                 rows.forEach(row => tbody.appendChild(row));
+                updateCount();
             }
 
             selectSort.onchange = () => {
