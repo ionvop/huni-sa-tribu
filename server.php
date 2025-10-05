@@ -202,7 +202,8 @@ function upload() {
     $stmt->bindValue(":description", $_POST["description"]);
     $stmt->bindValue(":file", $filename);
     $stmt->execute();
-    header("Location: content/");
+    // header("Location: content/");
+    alert("Content uploaded successfully.", "content/");
 }
 
 function edit() {
@@ -243,7 +244,8 @@ function edit() {
     $stmt->bindValue(":description", $_POST["description"]);
     $stmt->bindValue(":id", $_POST["id"]);
     $stmt->execute();
-    header("Location: content/");
+    // header("Location: content/");
+    alert("Content updated successfully.", "content/");
 }
 
 function archive() {
@@ -261,7 +263,8 @@ function archive() {
     $stmt = $db->prepare($query);
     $stmt->bindValue(":id", $_POST["id"]);
     $stmt->execute();
-    header("Location: content/archive/");
+    // header("Location: content/archive/");
+    alert("Content archived successfully.", "content/archive/");
 }
 
 function restore() {
@@ -281,7 +284,8 @@ function restore() {
     $stmt = $db->prepare($query);
     $stmt->bindValue(":id", $_POST["id"]);
     $stmt->execute();
-    header("Location: content/");
+    // header("Location: content/");
+    alert("Content restored successfully.", "content/");
 }
 
 function generateQr() {
@@ -316,7 +320,8 @@ function generateQr() {
     $stmt->bindValue(":code", $code);
     $stmt->execute();
     $qrId = $db->lastInsertRowID();
-    header("Location: visitors/qr/view/?id={$qrId}");
+    // header("Location: visitors/qr/view/?id={$qrId}");
+    alert("QR code generated successfully.", "visitors/qr/view/?id={$qrId}");
 }
 
 function editQr() {
@@ -330,7 +335,8 @@ function editQr() {
     $stmt->bindValue(":status", $_POST["status"]);
     $stmt->bindValue(":id", $_POST["id"]);
     $stmt->execute();
-    header("Location: visitors/qr/");
+    // header("Location: visitors/qr/");
+    alert("QR code status updated successfully.", "visitors/qr/");
 }
 
 function deleteQr() {
@@ -352,7 +358,8 @@ function deleteQr() {
     $stmt->bindValue(":id", $_POST["id"]);
     $stmt->execute();
 
-    header("Location: visitors/qr/");
+    // header("Location: visitors/qr/");
+    alert("QR code deleted successfully.", "visitors/qr/");
 }
 
 function defaultMethod() {
