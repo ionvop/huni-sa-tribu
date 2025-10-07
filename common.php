@@ -842,8 +842,6 @@ function buildQuery($query, $conditions, $bindings, $other = "") {
 }
 
 function getQrEngagement($qr) {
-    $db = new SQLite3("database.db");
-
     $query = <<<SQL
         SELECT COUNT(*) FROM `scans`
     SQL;
@@ -868,6 +866,9 @@ function getQrEngagement($qr) {
         SELECT COUNT(*) FROM `scans`
     SQL;
 
+    $conditions = [];
+    $bindings = [];
+
     if (isset($_GET["startDate"])) {
         $conditions[] = "`time` >= :startDate";
         $bindings["startDate"] = $_GET["startDate"];
@@ -885,5 +886,5 @@ function getQrEngagement($qr) {
         $engagementTotal = 1;
     }
 
-    return ($engagementCount / $engagementTotal) * 100;
+    return round(($engagementCount / $engagementTotal) * 100, 2);
 }
