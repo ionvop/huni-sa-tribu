@@ -2,3 +2,5 @@ config.php
 database.db
 uploads/*
 !uploads/blank.txt
+vendor/*
+composer.lock
