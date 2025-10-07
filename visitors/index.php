@@ -20,35 +20,10 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
 }
 
 $analytics = aggregateData($data, time());
-
-$query = <<<SQL
-    SELECT COUNT(*) AS `count`, `visitors`.`school` AS `school` FROM `visits`
-    LEFT JOIN `visitors` ON `visits`.`visitor_id` = `visitors`.`id`
-    WHERE `visitors`.`school` <> ''
-    GROUP BY `school`
-    ORDER BY `count` DESC
-SQL;
-
-$result = $db->query($query);
-$x = 0;
-
-$first = "N/A";
-$second = "N/A";
-$third = "N/A";
-
-while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-    if ($x == 0) {
-        $first = $row["school"];
-    } else if ($x == 1) {
-        $second = $row["school"];
-    } else if ($x == 2) {
-        $third = $row["school"];
-    } else {
-        break;
-    }
-
-    $x++;
-}
+$topSchools = getTopSchools();
+$first = isset($topSchools[0]) ? $topSchools[0] : "N/A";
+$second = isset($topSchools[1]) ? $topSchools[1] : "N/A";
+$third = isset($topSchools[2]) ? $topSchools[2] : "N/A";
 
 ?>
 
@@ -83,15 +58,69 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
                 <div style="
                     padding: 5rem;">
                     <div style="
-                        padding: 1rem;
-                        font-size: 1.5rem;
-                        font-weight: bold;">
-                        Visitors Management
-                    </div>
-                    <div style="
-                        padding: 1rem;
-                        padding-top: 0rem;">
-                        Visitors Engagement and Activities
+                        display: grid;
+                        grid-template-columns: max-content 1fr repeat(2, max-content);">
+                        <div>
+                            <div style="
+                                padding: 1rem;
+                                font-size: 1.5rem;
+                                font-weight: bold;">
+                                Visitors Management
+                            </div>
+                            <div style="
+                                padding: 1rem;
+                                padding-top: 0rem;">
+                                Visitors Engagement and Activities
+                            </div>
+                        </div>
+                        <div></div>
+                        <div>
+                            <div style="
+                                display: grid;
+                                grid-template-columns: repeat(2, 1fr);">
+                                <div style="
+                                    display: flex;
+                                    align-items: center;
+                                    padding: 1rem;">
+                                    Filter Start Date:
+                                </div>
+                                <div style="
+                                    padding: 1rem;
+                                    padding-left: 0rem;">
+                                    <input type="date"
+                                        id="inputStartDate">
+                                </div>
+                            </div>
+                            <div style="
+                                display: grid;
+                                grid-template-columns: repeat(2, 1fr);">
+                                <div style="
+                                    display: flex;
+                                    align-items: center;
+                                    padding: 1rem;
+                                    padding-top: 0rem;">
+                                    Filter End Date:
+                                </div>
+                                <div style="
+                                    padding: 1rem;
+                                    padding-left: 0rem;
+                                    padding-top: 0rem;">
+                                    <input type="date"
+                                        id="inputEndDate">
+                                </div>
+                            </div>
+                        </div>
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            padding: 1rem;">
+                            <button style="
+                                border-radius: 1rem;
+                                background-color: #5c6;"
+                                id="btnResetFilters">
+                                Reset Filters
+                            </button>
+                        </div>
                     </div>
                     <?=renderVisitorTabs("overview")?>
                     <div style="
@@ -132,7 +161,7 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
                                         text-align: center;
                                         font-size: 1.5rem;
                                         font-weight: bold;">
-                                        Visitors this month
+                                        Visitors this date range
                                     </div>
                                     <div style="
                                         padding: 1rem;
@@ -140,7 +169,7 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
                                         text-align: center;
                                         font-size: 2rem;
                                         font-weight: bold;">
-                                        <?=getVisitorsWithinMonth()?>
+                                        <?=getVisitorsWithinRange()?>
                                     </div>
                                 </div>
                             </div>
@@ -321,6 +350,31 @@ while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
             const canvasChartWeekly = document.getElementById('canvasChartWeekly');
             const canvasChartMonthly = document.getElementById('canvasChartMonthly');
             const selectChart = document.getElementById('selectChart');
+            const inputStartDate = document.getElementById('inputStartDate');
+            const inputEndDate = document.getElementById('inputEndDate');
+            const btnResetFilters = document.getElementById('btnResetFilters');
+            initialize();
+
+            function initialize() {
+                let startDate = new URLSearchParams(location.search).get("startDate");
+                let endDate = new URLSearchParams(location.search).get("endDate");
+                if (startDate) inputStartDate.value = new Date(startDate * 1000).toISOString().split("T")[0];
+                if (endDate) inputEndDate.value = new Date(endDate * 1000).toISOString().split("T")[0];
+            }
+
+            inputStartDate.onchange = () => {
+                const searchParams = new URLSearchParams(location.search);
+                searchParams.set('startDate', new Date(inputStartDate.value).getTime() / 1000);
+                location.search = searchParams;
+            }
+
+            inputEndDate.onchange = () => {
+                const searchParams = new URLSearchParams(location.search);
+                searchParams.set('endDate', new Date(inputEndDate.value).getTime() / 1000);
+                location.search = searchParams;
+            }
+
+            btnResetFilters.onclick = () => location.href = "visitors/";
 
             selectChart.onchange = () => {
                 canvasChartDaily.style.display = "none";
