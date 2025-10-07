@@ -67,15 +67,69 @@ $db = new SQLite3("database.db");
                     padding: 5rem;
                     padding-bottom: 1rem;">
                     <div style="
-                        padding: 1rem;
-                        font-size: 1.5rem;
-                        font-weight: bold;">
-                        Visitors Management
-                    </div>
-                    <div style="
-                        padding: 1rem;
-                        padding-top: 0rem;">
-                        Monitor visitor engagement across web and mobile platforms
+                        display: grid;
+                        grid-template-columns: max-content 1fr repeat(2, max-content);">
+                        <div>
+                            <div style="
+                                padding: 1rem;
+                                font-size: 1.5rem;
+                                font-weight: bold;">
+                                Visitors Management
+                            </div>
+                            <div style="
+                                padding: 1rem;
+                                padding-top: 0rem;">
+                                Monitor visitor engagement across web and mobile platforms
+                            </div>
+                        </div>
+                        <div></div>
+                        <div>
+                            <div style="
+                                display: grid;
+                                grid-template-columns: repeat(2, 1fr);">
+                                <div style="
+                                    display: flex;
+                                    align-items: center;
+                                    padding: 1rem;">
+                                    Filter Start Date:
+                                </div>
+                                <div style="
+                                    padding: 1rem;
+                                    padding-left: 0rem;">
+                                    <input type="date"
+                                        id="inputStartDate">
+                                </div>
+                            </div>
+                            <div style="
+                                display: grid;
+                                grid-template-columns: repeat(2, 1fr);">
+                                <div style="
+                                    display: flex;
+                                    align-items: center;
+                                    padding: 1rem;
+                                    padding-top: 0rem;">
+                                    Filter End Date:
+                                </div>
+                                <div style="
+                                    padding: 1rem;
+                                    padding-left: 0rem;
+                                    padding-top: 0rem;">
+                                    <input type="date"
+                                        id="inputEndDate">
+                                </div>
+                            </div>
+                        </div>
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            padding: 1rem;">
+                            <button style="
+                                border-radius: 1rem;
+                                background-color: #5c6;"
+                                id="btnResetFilters">
+                                Reset Filters
+                            </button>
+                        </div>
                     </div>
                     <?=renderVisitorTabs("qr")?>
                     <div style="
@@ -235,6 +289,9 @@ $db = new SQLite3("database.db");
                                             Status
                                         </th>
                                         <th>
+                                            Engagement
+                                        </th>
+                                        <th>
                                         </th>
                                     </tr>
                                 </thead>
@@ -262,6 +319,7 @@ $db = new SQLite3("database.db");
                                             $content = getQrContent($qr);
                                             $count = getQrScans($qr);
                                             $time = getQrLastScan($qr);
+                                            $engagement = getQrEngagement($qr);
 
                                             if ($time == false) {
                                                 $date = "Never scanned";
@@ -287,6 +345,9 @@ $db = new SQLite3("database.db");
                                                         {$statusMap[$qr["status"]]}
                                                     </td>
                                                     <td>
+                                                        {$engagement}%
+                                                    </td>
+                                                    <td>
                                                         <a href="visitors/qr/view?id={$qr['id']}">
                                                             <button style="
                                                                 background-color: #5c6;">
@@ -308,6 +369,32 @@ $db = new SQLite3("database.db");
         <script src="script.js"></script>
         <script>
             const inputSearch = document.getElementById("inputSearch");
+            const inputStartDate = document.getElementById('inputStartDate');
+            const inputEndDate = document.getElementById('inputEndDate');
+            const btnResetFilters = document.getElementById('btnResetFilters');
+            initialize();
+
+            function initialize() {
+                let startDate = new URLSearchParams(location.search).get("startDate");
+                let endDate = new URLSearchParams(location.search).get("endDate");
+                if (startDate) inputStartDate.value = new Date(startDate * 1000).toISOString().split("T")[0];
+                if (endDate) inputEndDate.value = new Date(endDate * 1000).toISOString().split("T")[0];
+            }
+
+            inputStartDate.onchange = () => {
+                const searchParams = new URLSearchParams(location.search);
+                searchParams.set('startDate', new Date(inputStartDate.value).getTime() / 1000);
+                location.search = searchParams;
+            }
+
+            inputEndDate.onchange = () => {
+                const searchParams = new URLSearchParams(location.search);
+                searchParams.set('endDate', new Date(inputEndDate.value).getTime() / 1000);
+                location.search = searchParams;
+            }
+
+            btnResetFilters.onclick = () => location.href = "visitors/qr/";
+
             inputSearch.oninput = () => filterTable(inputSearch.value);
 
             function filterTable(searchTerm) {
