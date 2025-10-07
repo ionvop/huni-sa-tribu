@@ -1,6 +1,10 @@
 <?php
 
 require_once "common.php";
+require 'vendor/autoload.php';
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 if (isset($_POST["method"])) {
     switch ($_POST["method"]) {
@@ -33,6 +37,9 @@ if (isset($_POST["method"])) {
             break;
         case "deleteQr":
             deleteQr();
+            break;
+        case "exportData":
+            exportData();
             break;
         default:
             defaultMethod();
@@ -360,6 +367,166 @@ function deleteQr() {
 
     // header("Location: visitors/qr/");
     alert("QR code deleted successfully.", "visitors/qr/");
+}
+
+function exportData() {
+    $db = new SQLite3("database.db");
+    $startDate = isset($_POST['startDate']) ? (int)$_POST['startDate'] : 0;
+    $endDate   = isset($_POST['endDate']) ? (int)$_POST['endDate'] : time();
+
+    // Get total scans & visits
+    $totalScans = $db->querySingle("
+        SELECT COUNT(scans.id)
+        FROM scans
+        WHERE scans.time BETWEEN $startDate AND $endDate
+    ");
+    $totalVisits = $db->querySingle("
+        SELECT COUNT(visits.id)
+        FROM visits
+        WHERE visits.time BETWEEN $startDate AND $endDate
+    ");
+
+    if ($totalScans == 0 && $totalVisits == 0) {
+        die("No scans or visits in this timeframe.");
+    }
+
+    // Prepare spreadsheet
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->setTitle('School Analytics');
+
+    // Set headers
+    $headers = [
+        'A1' => 'School Name',
+        'B1' => 'Student Count',
+        'C1' => 'Most Scanned Content',
+        'D1' => 'Most Scanned Content Count',
+        'E1' => 'Least Scanned Content',
+        'F1' => 'Least Scanned Content Count',
+        'G1' => 'Content Engagement',
+        'H1' => 'Visitor Engagement',
+        'I1' => 'Total Scans'
+    ];
+
+    foreach ($headers as $cell => $text) {
+        $sheet->setCellValue($cell, $text);
+    }
+
+    // Query schools with visits in timeframe
+    $stmt = $db->prepare("
+        SELECT visitors.school, COUNT(visits.id) AS visit_count
+        FROM visits
+        JOIN visitors ON visits.visitor_id = visitors.id
+        WHERE visits.time BETWEEN :start AND :end
+        GROUP BY visitors.school
+        HAVING visit_count > 0
+        ORDER BY visitors.school ASC
+    ");
+    $stmt->bindValue(':start', $startDate, SQLITE3_INTEGER);
+    $stmt->bindValue(':end', $endDate, SQLITE3_INTEGER);
+    $schools = $stmt->execute();
+
+    $row = 2; // Start data from row 2
+    while ($schoolRow = $schools->fetchArray(SQLITE3_ASSOC)) {
+        $school = $schoolRow['school'];
+
+        // Student count
+        $studentCount = $db->querySingle("
+            SELECT COUNT(DISTINCT visitors.id)
+            FROM visitors
+            WHERE school = '{$school}'
+        ");
+
+        // Total scans by this school
+        $schoolTotalScans = $db->querySingle("
+            SELECT COUNT(scans.id)
+            FROM scans
+            JOIN visitors ON scans.visitor_id = visitors.id
+            WHERE visitors.school = '{$school}'
+              AND scans.time BETWEEN $startDate AND $endDate
+        ");
+
+        // Most scanned content
+        $mostScanned = $db->querySingle("
+            SELECT content.title
+            FROM scans
+            JOIN visitors ON scans.visitor_id = visitors.id
+            JOIN qr ON scans.qr_id = qr.id
+            JOIN content ON qr.content_id = content.id
+            WHERE visitors.school = '{$school}'
+              AND scans.time BETWEEN $startDate AND $endDate
+            GROUP BY content.id
+            ORDER BY COUNT(scans.id) DESC
+            LIMIT 1
+        ");
+
+        $mostScannedCount = $db->querySingle("
+            SELECT COUNT(scans.id)
+            FROM scans
+            JOIN visitors ON scans.visitor_id = visitors.id
+            JOIN qr ON scans.qr_id = qr.id
+            JOIN content ON qr.content_id = content.id
+            WHERE visitors.school = '{$school}'
+              AND scans.time BETWEEN $startDate AND $endDate
+              AND content.title = '{$mostScanned}'
+        ");
+
+        // Least scanned content
+        $leastScanned = $db->querySingle("
+            SELECT content.title
+            FROM scans
+            JOIN visitors ON scans.visitor_id = visitors.id
+            JOIN qr ON scans.qr_id = qr.id
+            JOIN content ON qr.content_id = content.id
+            WHERE visitors.school = '{$school}'
+              AND scans.time BETWEEN $startDate AND $endDate
+            GROUP BY content.id
+            ORDER BY COUNT(scans.id) ASC
+            LIMIT 1
+        ");
+
+        $leastScannedCount = $db->querySingle("
+            SELECT COUNT(scans.id)
+            FROM scans
+            JOIN visitors ON scans.visitor_id = visitors.id
+            JOIN qr ON scans.qr_id = qr.id
+            JOIN content ON qr.content_id = content.id
+            WHERE visitors.school = '{$school}'
+              AND scans.time BETWEEN $startDate AND $endDate
+              AND content.title = '{$leastScanned}'
+        ");
+
+        // Engagement calculations
+        $contentEngagement = $totalScans > 0 ? round(($schoolTotalScans / $totalScans) * 100, 2) . "%" : "0%";
+        $visitorEngagement = $totalVisits > 0 ? round(($schoolRow['visit_count'] / $totalVisits) * 100, 2) . "%" : "0%";
+
+        // Fill row
+        $sheet->setCellValue("A{$row}", $school == "" ? 'N/A' : $school);
+        $sheet->setCellValue("B{$row}", $studentCount);
+        $sheet->setCellValue("C{$row}", $mostScanned);
+        $sheet->setCellValue("D{$row}", $mostScannedCount);
+        $sheet->setCellValue("E{$row}", $leastScanned);
+        $sheet->setCellValue("F{$row}", $leastScannedCount);
+        $sheet->setCellValue("G{$row}", $contentEngagement);
+        $sheet->setCellValue("H{$row}", $visitorEngagement);
+        $sheet->setCellValue("I{$row}", $schoolTotalScans);
+
+        $row++;
+    }
+
+    // Auto-size columns for readability
+    foreach (range('A', 'I') as $col) {
+        $sheet->getColumnDimension($col)->setAutoSize(true);
+    }
+
+    // Output Excel file to browser
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="school_analytics.xlsx"');
+    header('Cache-Control: max-age=0');
+
+    $writer = new Xlsx($spreadsheet);
+    $writer->save('php://output');
+    exit;
 }
 
 function defaultMethod() {
