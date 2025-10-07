@@ -66,15 +66,69 @@ $db = new SQLite3("database.db");
                 <div style="
                     padding: 5rem;">
                     <div style="
-                        padding: 1rem;
-                        font-size: 1.5rem;
-                        font-weight: bold;">
-                        Visitors Management
-                    </div>
-                    <div style="
-                        padding: 1rem;
-                        padding-top: 0rem;">
-                        Monitor visitor engagement across web and mobile platforms
+                        display: grid;
+                        grid-template-columns: max-content 1fr repeat(2, max-content);">
+                        <div>
+                            <div style="
+                                padding: 1rem;
+                                font-size: 1.5rem;
+                                font-weight: bold;">
+                                Visitors Management
+                            </div>
+                            <div style="
+                                padding: 1rem;
+                                padding-top: 0rem;">
+                                Monitor visitor engagement across web and mobile platforms
+                            </div>
+                        </div>
+                        <div></div>
+                        <div>
+                            <div style="
+                                display: grid;
+                                grid-template-columns: repeat(2, 1fr);">
+                                <div style="
+                                    display: flex;
+                                    align-items: center;
+                                    padding: 1rem;">
+                                    Filter Start Date:
+                                </div>
+                                <div style="
+                                    padding: 1rem;
+                                    padding-left: 0rem;">
+                                    <input type="date"
+                                        id="inputStartDate">
+                                </div>
+                            </div>
+                            <div style="
+                                display: grid;
+                                grid-template-columns: repeat(2, 1fr);">
+                                <div style="
+                                    display: flex;
+                                    align-items: center;
+                                    padding: 1rem;
+                                    padding-top: 0rem;">
+                                    Filter End Date:
+                                </div>
+                                <div style="
+                                    padding: 1rem;
+                                    padding-left: 0rem;
+                                    padding-top: 0rem;">
+                                    <input type="date"
+                                        id="inputEndDate">
+                                </div>
+                            </div>
+                        </div>
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            padding: 1rem;">
+                            <button style="
+                                border-radius: 1rem;
+                                background-color: #5c6;"
+                                id="btnResetFilters">
+                                Reset Filters
+                            </button>
+                        </div>
                     </div>
                     <?=renderVisitorTabs("visitors")?>
                     <div style="
@@ -101,7 +155,7 @@ $db = new SQLite3("database.db");
                                         text-align: center;
                                         font-size: 2rem;
                                         font-weight: bold;">
-                                        <?=getTotalVisitors()?>
+                                        <?=getVisitorsWithinRange()?>
                                     </div>
                                 </div>
                             </div>
@@ -122,8 +176,8 @@ $db = new SQLite3("database.db");
                                         padding-top: 0rem;
                                         text-align: center;
                                         font-size: 2rem;
-                                        font-weight: bold;">
-                                        <?=round(getReturningVisitorsRatio() * 100, 2)?>%
+                                        font-weight: bold;"
+                                        id="panelReturningVisitors">
                                     </div>
                                 </div>
                             </div>
@@ -134,7 +188,7 @@ $db = new SQLite3("database.db");
                     background-image: linear-gradient(to bottom, #020, #000);">
                     <div style="
                         display: grid;
-                        grid-template-columns: 1fr repeat(3, max-content);">
+                        grid-template-columns: 1fr repeat(4, max-content);">
                         <div style="
                             display: flex;
                             align-items: center;
@@ -144,6 +198,30 @@ $db = new SQLite3("database.db");
                             text-align: center;">
                             Detailed Visitor Engagement
                         </div>
+                        <form style="
+                            display: flex;
+                            align-items: center;
+                            padding: 1rem;"
+                            action="server.php"
+                            method="post"
+                            enctype="multipart/form-data"
+                            target="_blank">
+                            <button style="
+                                background-color: #5c6;
+                                border-radius: 1rem;
+                                color: #fff;"
+                                name="method"
+                                value="exportData"
+                                id="btnExportData">
+                                Export Data
+                            </button>
+                            <input type="hidden"
+                                name="startDate"
+                                value="<?=isset($_GET["startDate"]) ? $_GET["startDate"] : 9?>">
+                            <input type="hidden"
+                                name="endDate"
+                                value="<?=isset($_GET["endDate"]) ? $_GET["endDate"] : time()?>">
+                        </form>
                         <div style="
                             display: flex;
                             align-items: center;
@@ -212,29 +290,114 @@ $db = new SQLite3("database.db");
                                 </thead>
                                 <tbody id="tbody">
                                     <?php
+                                        // $query = <<<SQL
+                                        //     SELECT * FROM `visitors`
+                                        // SQL;
+
+                                        // $result = $db->query($query);
+
+                                        // while ($visitor = $result->fetchArray()) {
+                                        //     $school = $visitor["school"];
+
+                                        //     if ($school == "") {
+                                        //         $school = "N/A";
+                                        //     }
+
+                                        //     $date = date("m/d/y", $visitor["time"] + 28800);
+                                        //     $contentViews = getVisitorContentViews($visitor);
+                                        //     $returningVisitor = getVisitorVisitCount($visitor) > 1 ? "Yes" : "No";
+                                        //     $engagement = getVisitorEngagement($visitor);
+                                        //     $engagement = round($engagement * 100, 2);
+
+                                        //     echo <<<HTML
+                                        //         <tr>
+                                        //             <td>
+                                        //                 {$visitor['name']}
+                                        //             </td>
+                                        //             <td>
+                                        //                 {$school}
+                                        //             </td>
+                                        //             <td>
+                                        //                 {$date}
+                                        //             </td>
+                                        //             <td>
+                                        //                 {$contentViews}
+                                        //             </td>
+                                        //             <td>
+                                        //                 {$returningVisitor}
+                                        //             </td>
+                                        //             <td>
+                                        //                 {$engagement}%
+                                        //             </td>
+                                        //         </tr>
+                                        //     HTML;
+                                        // }
+
+                                        $startDate = isset($_GET['startDate']) ? (int)$_GET['startDate'] : 0;
+                                        $endDate   = isset($_GET['endDate']) ? (int)$_GET['endDate'] : time();
+
                                         $query = <<<SQL
-                                            SELECT * FROM `visitors`
+                                            SELECT COUNT(*) AS `total_scans`
+                                            FROM `scans`
+                                            WHERE time BETWEEN :start AND :end
                                         SQL;
 
-                                        $result = $db->query($query);
+                                        $totalScanStmt = $db->prepare($query);
+                                        $totalScanStmt->bindValue(':start', $startDate, SQLITE3_INTEGER);
+                                        $totalScanStmt->bindValue(':end', $endDate, SQLITE3_INTEGER);
+                                        $totalScans = (int)$totalScanStmt->execute()->fetchArray(SQLITE3_ASSOC)['total_scans'];
 
-                                        while ($visitor = $result->fetchArray()) {
-                                            $school = $visitor["school"];
+                                        if ($totalScans === 0) {
+                                            $totalScans = 1;
+                                        }
 
-                                            if ($school == "") {
-                                                $school = "N/A";
-                                            }
+                                        $query = <<<SQL
+                                            SELECT 
+                                                `v`.`id`,
+                                                `v`.`name`,
+                                                `v`.`school`,
+                                                `v`.`time` AS `first_visit_time`,
+                                                COUNT(DISTINCT `vi`.`id`) AS `total_visits`,
+                                                (
+                                                    SELECT COUNT(*) 
+                                                    FROM `scans` `s`
+                                                    WHERE `s`.`visitor_id` = `v`.`id` AND `s`.`time` BETWEEN :start AND :end
+                                                ) AS `scans_made`
+                                            FROM `visitors` `v`
+                                            JOIN `visits` `vi` ON `vi`.`visitor_id` = `v`.`id`
+                                            WHERE `vi`.`time` BETWEEN :start AND :end
+                                            GROUP BY `v`.`id`
+                                            ORDER BY `v`.`name`
+                                        SQL;
 
-                                            $date = date("m/d/y", $visitor["time"] + 28800);
-                                            $contentViews = getVisitorContentViews($visitor);
-                                            $returningVisitor = getVisitorVisitCount($visitor) > 1 ? "Yes" : "No";
-                                            $engagement = getVisitorEngagement($visitor);
-                                            $engagement = round($engagement * 100, 2);
+                                        $stmt = $db->prepare($query);
+                                        $stmt->bindValue(':start', $startDate, SQLITE3_INTEGER);
+                                        $stmt->bindValue(':end', $endDate, SQLITE3_INTEGER);
+                                        $result = $stmt->execute();
+                                        $visitors = [];
+
+                                        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                                            $engagement = ($row['scans_made'] / $totalScans) * 100;
+
+                                            // $visitors[] = [
+                                            //     'Name'              => $row['name'],
+                                            //     'School'            => $row['school'],
+                                            //     'Date'              => date('m/d/Y', $row['first_visit_time']),
+                                            //     'Content Viewed'    => (int)$row['scans_made'],
+                                            //     'Returning Visitor' => $row['total_visits'] > 1 ? 'Yes' : 'No',
+                                            //     'Engagement'        => round($engagement, 2) . '%'
+                                            // ];
+
+                                            $school = $row['school'] == '' ? 'N/A' : $row['school'];
+                                            $date = date('m/d/Y', $row['first_visit_time']);
+                                            $contentViews = (int)$row['scans_made'];
+                                            $returningVisitor = $row['total_visits'] > 1 ? 'Yes' : 'No';
+                                            $engagement = round($engagement, 2);
 
                                             echo <<<HTML
                                                 <tr>
                                                     <td>
-                                                        {$visitor['name']}
+                                                        {$row['name']}
                                                     </td>
                                                     <td>
                                                         {$school}
@@ -260,19 +423,40 @@ $db = new SQLite3("database.db");
                         </div>
                     </div>
                 </div>
+                <div style="
+                    padding: 5rem;
+                    background-image: linear-gradient(to bottom, #020, #000);">
+                    <canvas style="
+                        width: 100%;
+                        height: 30rem;"
+                        id="canvasChart">
+                    </canvas>
+                </div>
             </div>
         </div>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="script.js"></script>
         <script>
             const selectSchools = document.getElementById("selectSchools");
             const selectSort = document.getElementById("selectSort");
             const panelCount = document.getElementById("panelCount");
+            const inputStartDate = document.getElementById('inputStartDate');
+            const inputEndDate = document.getElementById('inputEndDate');
+            const btnResetFilters = document.getElementById('btnResetFilters');
+            const panelReturningVisitors = document.getElementById("panelReturningVisitors");
+            const canvasChart = document.getElementById("canvasChart");
+            const btnExportData = document.getElementById("btnExportData");
             const tbody = document.getElementById("tbody");
             let tbodyOriginalHtml = tbody.innerHTML;
             const schools = [];
             initialize();
 
             function initialize() {
+                let startDate = new URLSearchParams(location.search).get("startDate");
+                let endDate = new URLSearchParams(location.search).get("endDate");
+                if (startDate) inputStartDate.value = new Date(startDate * 1000).toISOString().split("T")[0];
+                if (endDate) inputEndDate.value = new Date(endDate * 1000).toISOString().split("T")[0];
+
                 for (const tr of tbody.querySelectorAll("tr")) {
                     const school = tr.children[1].textContent.trim();
                     const option = document.createElement("option");
@@ -284,7 +468,52 @@ $db = new SQLite3("database.db");
                 }
 
                 updateCount();
+
+                let returningVisitorCount = 0;
+                let returningVisitorTotal = 0;
+
+                for (let tr of tbody.querySelectorAll("tr")) {
+                    const returningVisitor = tr.children[4].textContent.trim();
+                    if (returningVisitor == "Yes") {
+                        returningVisitorCount++;
+                    }
+                    returningVisitorTotal++;
+                }
+
+                if (returningVisitorTotal == 0) returningVisitorTotal = 1; // Prevent division by zero
+                const returningVisitorPercentage = (returningVisitorCount / returningVisitorTotal) * 100;
+                panelReturningVisitors.textContent = `${returningVisitorPercentage.toFixed(2)}%`;
+
+                new Chart(canvasChart, {
+                    type: 'bar',
+                    data: {
+                        labels: schools,
+                        datasets: [
+                            {
+                                label: '# of Visitors',
+                                data: groupCountBySchool(tbody),
+                                borderWidth: 1
+                            }
+                        ]
+                    }
+                })
             }
+
+            btnExportData.onclick = () => confirm("Are you sure you want to export this data?");
+
+            inputStartDate.onchange = () => {
+                const searchParams = new URLSearchParams(location.search);
+                searchParams.set('startDate', new Date(inputStartDate.value).getTime() / 1000);
+                location.search = searchParams;
+            }
+
+            inputEndDate.onchange = () => {
+                const searchParams = new URLSearchParams(location.search);
+                searchParams.set('endDate', new Date(inputEndDate.value).getTime() / 1000);
+                location.search = searchParams;
+            }
+
+            btnResetFilters.onclick = () => location.href = "visitors/visitors/";
 
             selectSchools.onchange = () => {
                 if (selectSchools.value == "") {
@@ -320,7 +549,7 @@ $db = new SQLite3("database.db");
 
                 panelCount.innerHTML = /*html*/`
                     Total Visitors: ${visitorCount}<br>
-                    Total Schools: ${schoolCount}
+                    Total Schools: ${schoolCount < 0 ? 0 : schoolCount}
                 `;
             }
 
@@ -338,6 +567,26 @@ $db = new SQLite3("database.db");
                 // Append rows in new order
                 rows.forEach(row => tbody.appendChild(row));
                 updateCount();
+            }
+
+            function groupCountBySchool(tbody, schoolColumnIndex = 1) {
+                if (!tbody) {
+                    console.error("Tbody not found!");
+                    return {};
+                }
+
+                const counts = {};
+
+                for (const row of tbody.querySelectorAll("tr")) {
+                    const cells = row.querySelectorAll("td");
+                    const school = cells[schoolColumnIndex]?.textContent.trim();
+
+                    if (school) {
+                        counts[school] = (counts[school] || 0) + 1;
+                    }
+                }
+
+                return counts;
             }
 
             selectSort.onchange = () => {
