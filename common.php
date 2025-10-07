@@ -237,25 +237,65 @@ function getQrContent($qr) {
 function getQrScans($qr) {
     $db = new SQLite3("database.db");
 
+    // $query = <<<SQL
+    //     SELECT COUNT(*) FROM `scans` WHERE `qr_id` = :id
+    // SQL;
+
+    // $result = $db->prepare($query);
+    // $result->bindValue(":id", $qr["id"]);
+
     $query = <<<SQL
-        SELECT COUNT(*) FROM `scans` WHERE `qr_id` = :id
+        SELECT COUNT(*) FROM `scans`
     SQL;
 
-    $result = $db->prepare($query);
-    $result->bindValue(":id", $qr["id"]);
-    return $result->execute()->fetchArray()[0];
+    $conditions = ["`qr_id` = :id"];
+    $bindings = ["id" => $qr["id"]];
+
+    if (isset($_GET["startDate"])) {
+        $conditions[] = "`time` >= :startDate";
+        $bindings["startDate"] = $_GET["startDate"];
+    }
+
+    if (isset($_GET["endDate"])) {
+        $conditions[] = "`time` <= :endDate";
+        $bindings["endDate"] = $_GET["endDate"];
+    }
+
+    $result = buildQuery($query, $conditions, $bindings);
+    return $result->fetchArray()[0];
 }
 
 function getQrLastScan($qr) {
     $db = new SQLite3("database.db");
 
+    // $query = <<<SQL
+    //     SELECT * FROM `scans` WHERE `qr_id` = :id ORDER BY `time` DESC LIMIT 1
+    // SQL;
+
+    // $result = $db->prepare($query);
+    // $result->bindValue(":id", $qr["id"]);
+    // $scan = $result->execute()->fetchArray();
+
     $query = <<<SQL
-        SELECT * FROM `scans` WHERE `qr_id` = :id ORDER BY `time` DESC LIMIT 1
+        SELECT * FROM `scans`
     SQL;
 
-    $result = $db->prepare($query);
-    $result->bindValue(":id", $qr["id"]);
-    $scan = $result->execute()->fetchArray();
+    $conditions = ["`qr_id` = :id"];
+    $bindings = ["id" => $qr["id"]];
+    $other = "ORDER BY `time` DESC LIMIT 1";
+
+    if (isset($_GET["startDate"])) {
+        $conditions[] = "`time` >= :startDate";
+        $bindings["startDate"] = $_GET["startDate"];
+    }
+
+    if (isset($_GET["endDate"])) {
+        $conditions[] = "`time` <= :endDate";
+        $bindings["endDate"] = $_GET["endDate"];
+    }
+
+    $result = buildQuery($query, $conditions, $bindings, $other);
+    $scan = $result->fetchArray();
 
     if ($scan == false) {
         return false;
@@ -275,21 +315,36 @@ function getTotalVisitors() {
     return $result->fetchArray()[0];
 }
 
-function getVisitorsWithinMonth() {
-    $db = new SQLite3("database.db");
-
+function getVisitorsWithinRange() {
     $query = <<<SQL
-        SELECT COUNT(*)
-        FROM (
-            SELECT * FROM `visits`
-            WHERE `time` > :time
-            GROUP BY `visitor_id`
-        )
+        SELECT * FROM `visits`
     SQL;
 
-    $result = $db->prepare($query);
-    $result->bindValue(":time", time() - (86400 * 30));
-    return $result->execute()->fetchArray()[0];
+    $conditions = [];
+    $bindings = [];
+
+    if (isset($_GET["startDate"])) {
+        $conditions[] = "`time` >= :startDate";
+        $bindings["startDate"] = $_GET["startDate"];
+    }
+
+    if (isset($_GET["endDate"])) {
+        $conditions[] = "`time` <= :endDate";
+        $bindings["endDate"] = $_GET["endDate"];
+    }
+
+    $result = buildQuery($query, $conditions, $bindings);
+    $visitor_ids = [];
+
+    while ($row = $result->fetchArray()) {
+        if (in_array($row["visitor_id"], $visitor_ids)) {
+            continue;
+        }
+
+        $visitor_ids[] = $row["visitor_id"];
+    }
+
+    return count($visitor_ids);
 }
 
 function majorityHour(array $timestamps): ?int {
@@ -332,12 +387,22 @@ function getPeakHour() {
 
     $query = <<<SQL
         SELECT `time` FROM `visits`
-        WHERE `time` > :time
     SQL;
 
-    $stmt = $db->prepare($query);
-    $stmt->bindValue(":time", time() - (86400 * 30));
-    $result = $stmt->execute();
+    $conditions = [];
+    $bindings = [];
+
+    if (isset($_GET["startDate"])) {
+        $conditions[] = "`time` >= :startDate";
+        $bindings["startDate"] = $_GET["startDate"];
+    }
+
+    if (isset($_GET["endDate"])) {
+        $conditions[] = "`time` <= :endDate";
+        $bindings["endDate"] = $_GET["endDate"];
+    }
+
+    $result = buildQuery($query, $conditions, $bindings);
     $timestamps = [];
 
     while ($row = $result->fetchArray()) {
@@ -345,6 +410,36 @@ function getPeakHour() {
     }
 
     return convertToAmPm(majorityHour($timestamps));
+}
+
+function getTopSchools() {
+    $db = new SQLite3("database.db");
+    $startDate = isset($_GET['startDate']) ? (int)$_GET['startDate'] : 0;
+    $endDate   = isset($_GET['endDate']) ? (int)$_GET['endDate'] : time();
+
+    $sql = <<<SQL
+        SELECT 
+            `visitors`.`school`,
+            COUNT(`visits`.`id`) AS `visit_count`
+        FROM `visits`
+        JOIN `visitors` ON `visits`.`visitor_id` = `visitors`.`id`
+        WHERE `visits`.`time` BETWEEN :start AND :end
+        AND `visitors`.`school` != ''
+        GROUP BY `visitors`.`school`
+        ORDER BY `visit_count` DESC
+    SQL;
+
+    $stmt = $db->prepare($sql);
+    $stmt->bindValue(':start', $startDate, SQLITE3_INTEGER);
+    $stmt->bindValue(':end', $endDate, SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $schools = [];
+
+    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+        $schools[] = $row["school"];
+    }
+
+    return $schools;
 }
 
 function getReturningVisitorsRatio() {
@@ -462,70 +557,122 @@ function getTotalScans() {
 
 function getMostScanned() {
     $db = new SQLite3("database.db");
+    $startDate = isset($_GET['startDate']) ? (int)$_GET['startDate'] : 0;
+    $endDate   = isset($_GET['endDate']) ? (int)$_GET['endDate'] : time();
 
     $query = <<<SQL
-        SELECT COUNT(*) AS `count`, `qr_id` FROM `scans`
-        GROUP BY `qr_id` ORDER BY `count` DESC
-    SQL;
-
-    $result = $db->query($query);
-    $qrId = $result->fetchArray();
-
-    if ($qrId == false) {
-        return false;
-    }
-    
-    $query = <<<SQL
-        SELECT * FROM `qr` WHERE `id` = :id
+        SELECT 
+            `content`.`id`,
+            `content`.`title`,
+            `content`.`category`,
+            `content`.`tribe`,
+            `content`.`description`,
+            `content`.`file`,
+            COUNT(`scans`.`id`) AS `scan_count`
+        FROM `scans`
+        JOIN `qr` ON `scans`.`qr_id` = `qr`.`id`
+        JOIN `content` ON `qr`.`content_id` = `content`.`id`
+        WHERE `scans`.`time` BETWEEN :start AND :end
+        AND `content`.`is_archived` = 0
+        GROUP BY `content`.`id`
+        ORDER BY `scan_count` DESC
+        LIMIT 1;
     SQL;
 
     $stmt = $db->prepare($query);
-    $stmt->bindValue(":id", $qrId["qr_id"]);
-    $qr = $stmt->execute()->fetchArray();
+    $stmt->bindValue(':start', $startDate, SQLITE3_INTEGER);
+    $stmt->bindValue(':end', $endDate, SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $mostScanned = $result->fetchArray(SQLITE3_ASSOC);
+
+    if ($mostScanned == false) {
+        return false;
+    }
 
     $query = <<<SQL
         SELECT * FROM `content` WHERE `id` = :id
     SQL;
 
     $stmt = $db->prepare($query);
-    $stmt->bindValue(":id", $qr["content_id"]);
-    return $stmt->execute()->fetchArray();
+    $stmt->bindValue(":id", $mostScanned["id"]);
+    $content = $stmt->execute()->fetchArray();
+
+    return $content;
 }
 
 function getLeastScanned() {
     $db = new SQLite3("database.db");
 
-    $query = <<<SQL
-        SELECT `qr`.`id`, COUNT(`scans`.`qr_id`) AS `count`
-        FROM `qr`
-        LEFT JOIN `scans` ON `qr`.`id` = `scans`.`qr_id`
-        GROUP BY `qr`.`id`
-        ORDER BY `count` ASC
-        LIMIT 1
-    SQL;
+    // $query = <<<SQL
+    //     SELECT `qr`.`id`, COUNT(`scans`.`qr_id`) AS `count`
+    //     FROM `qr`
+    //     LEFT JOIN `scans` ON `qr`.`id` = `scans`.`qr_id`
+    //     GROUP BY `qr`.`id`
+    //     ORDER BY `count` ASC
+    //     LIMIT 1
+    // SQL;
 
-    $result = $db->query($query);
-    $qrId = $result->fetchArray();
+    // $result = $db->query($query);
+    // $qrId = $result->fetchArray();
 
-    if ($qrId == false) {
-        return false;
-    }
+    // if ($qrId == false) {
+    //     return false;
+    // }
     
+    // $query = <<<SQL
+    //     SELECT * FROM `qr` WHERE `id` = :id
+    // SQL;
+
+    // $stmt = $db->prepare($query);
+    // $stmt->bindValue(":id", $qrId["id"]);
+    // $qr = $stmt->execute()->fetchArray();
+
+    // $query = <<<SQL
+    //     SELECT * FROM `content` WHERE `id` = :id
+    // SQL;
+
+    // $stmt = $db->prepare($query);
+    // $stmt->bindValue(":id", $qr["content_id"]);
+    // return $stmt->execute()->fetchArray();
+
+    $startDate = isset($_GET['startDate']) ? (int)$_GET['startDate'] : 0;
+    $endDate   = isset($_GET['endDate']) ? (int)$_GET['endDate'] : time();
+
     $query = <<<SQL
-        SELECT * FROM `qr` WHERE `id` = :id
+        SELECT 
+            `content`.`id`,
+            `content`.`title`,
+            `content`.`category`,
+            `content`.`tribe`,
+            `content`.`description`,
+            `content`.`file`,
+            COUNT(`scans`.`id`) AS `scan_count`
+        FROM `content`
+        JOIN `qr` ON `qr`.`content_id` = `content`.`id`
+        LEFT JOIN `scans` 
+            ON `scans`.`qr_id` = `qr`.`id` 
+            AND `scans`.`time` BETWEEN :start AND :end
+        WHERE `content`.`is_archived` = 0
+        GROUP BY `content`.`id`
+        ORDER BY `scan_count` ASC
+        LIMIT 1;
     SQL;
 
     $stmt = $db->prepare($query);
-    $stmt->bindValue(":id", $qrId["id"]);
-    $qr = $stmt->execute()->fetchArray();
+    $stmt->bindValue(':start', $startDate, SQLITE3_INTEGER);
+    $stmt->bindValue(':end', $endDate, SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $leastScanned = $result->fetchArray(SQLITE3_ASSOC);
 
     $query = <<<SQL
         SELECT * FROM `content` WHERE `id` = :id
     SQL;
 
     $stmt = $db->prepare($query);
-    $stmt->bindValue(":id", $qr["content_id"]);
-    return $stmt->execute()->fetchArray();
+    $stmt->bindValue(":id", $leastScanned["id"]);
+    $leastScanned = $stmt->execute()->fetchArray();
+
+    return $leastScanned;
 }
 
 function getScanCount($content) {
@@ -672,4 +819,71 @@ function hasVisitorScannedToday($visitor) {
     $lastVisit = date("Y-m-d", $lastVisit + (8 * 60 * 60));
     $currentDate = date("Y-m-d", time() + (8 * 60 * 60));
     return $lastVisit == $currentDate;
+}
+
+function buildQuery($query, $conditions, $bindings, $other = "") {
+    $db = new SQLite3("database.db");
+
+    if (count($conditions) > 0) {
+        $query .= " WHERE " . implode(" AND ", $conditions);
+    }
+
+    if ($other != "") {
+        $query .= " " . $other;
+    }
+
+    $stmt = $db->prepare($query);
+
+    foreach ($bindings as $key => $value) {
+        $stmt->bindValue($key, $value);
+    }
+
+    return $stmt->execute();
+}
+
+function getQrEngagement($qr) {
+    $db = new SQLite3("database.db");
+
+    $query = <<<SQL
+        SELECT COUNT(*) FROM `scans`
+    SQL;
+
+    $conditions = ["`qr_id` = :id"];
+    $bindings = ["id" => $qr["id"]];
+
+    if (isset($_GET["startDate"])) {
+        $conditions[] = "`time` >= :startDate";
+        $bindings["startDate"] = $_GET["startDate"];
+    }
+
+    if (isset($_GET["endDate"])) {
+        $conditions[] = "`time` <= :endDate";
+        $bindings["endDate"] = $_GET["endDate"];
+    }
+
+    $result = buildQuery($query, $conditions, $bindings);
+    $engagementCount = $result->fetchArray()[0];
+
+    $query = <<<SQL
+        SELECT COUNT(*) FROM `scans`
+    SQL;
+
+    if (isset($_GET["startDate"])) {
+        $conditions[] = "`time` >= :startDate";
+        $bindings["startDate"] = $_GET["startDate"];
+    }
+
+    if (isset($_GET["endDate"])) {
+        $conditions[] = "`time` <= :endDate";
+        $bindings["endDate"] = $_GET["endDate"];
+    }
+
+    $result = buildQuery($query, $conditions, $bindings);
+    $engagementTotal = $result->fetchArray()[0];
+
+    if ($engagementTotal == 0) {
+        $engagementTotal = 1;
+    }
+
+    return ($engagementCount / $engagementTotal) * 100;
 }
