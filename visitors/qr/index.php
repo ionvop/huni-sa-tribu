@@ -377,8 +377,16 @@ $db = new SQLite3("database.db");
             function initialize() {
                 let startDate = new URLSearchParams(location.search).get("startDate");
                 let endDate = new URLSearchParams(location.search).get("endDate");
-                if (startDate) inputStartDate.value = new Date(startDate * 1000).toISOString().split("T")[0];
-                if (endDate) inputEndDate.value = new Date(endDate * 1000).toISOString().split("T")[0];
+                
+                if (startDate) {
+                    inputStartDate.value = new Date(startDate * 1000).toISOString().split("T")[0];
+                    inputEndDate.min = new Date(startDate * 1000).toISOString().split("T")[0];
+                }
+
+                if (endDate) {
+                    inputEndDate.value = new Date(endDate * 1000).toISOString().split("T")[0];
+                    inputStartDate.max = new Date(endDate * 1000).toISOString().split("T")[0];
+                }
             }
 
             inputStartDate.onchange = () => {
